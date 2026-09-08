@@ -25,6 +25,7 @@ A fruit fly's complete wiring diagram — 139,255 neurons, 50M+ synapses
 | 🧠 | **Taste → motor, through real wiring** | Sugar input drives the "eat" motor neuron (0→92 Hz, dose-dependent). Bitter vetoes it (93% suppression). **Zero training.** |
 | 🦿 | **Walking** | Anatomically detailed MuJoCo fly, tripod gait + commanded turns ([video](media/b1_walking.mp4)) |
 | 👁 | **Seeing** | Closed-loop visual pursuit from 721-ommatidia retina readings ([video](media/b2_taxis_with_retina.mp4)) |
+| 🎓 | **Learning** | Classical conditioning in the olfactory→MB pathway: 99% suppression of the rewarded odor, graded generalization with similarity ([report](experiments/learning/report.md)) |
 
 Everything runs on a **CPU-only box** — no GPU, no sudo.
 

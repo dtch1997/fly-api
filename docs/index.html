@@ -111,6 +111,7 @@
     <div class="stat"><div class="v">0</div><div class="k">training steps needed</div></div>
     <div class="stat"><div class="v">93%</div><div class="k">bitter veto of the feeding command</div></div>
     <div class="stat"><div class="v">100%</div><div class="k">visual target kept in view</div></div>
+    <div class="stat"><div class="v">99%</div><div class="k">learned suppression of the rewarded odor</div></div>
   </div>
 
   <h2>The brain, tasting</h2>
@@ -169,6 +170,34 @@
     dark blob is the target. Azimuthal position on each retina maps to
     descending steering drives; the object stays in view for 100% of
     decision steps, mean deviation 0.25. Shown at 0.5× speed.</figcaption>
+  </figure>
+
+
+  <h2>The brain, learning</h2>
+  <p>Can it learn? We added the fly's actual learning rule — dopamine-gated
+  depression at Kenyon-cell→MBON synapses — to the connectome's
+  olfactory pathway and ran classical conditioning: odor A paired with a
+  reward signal, odor B unpaired. Getting a stable substrate first
+  required a real finding: the published whole-brain model is
+  <em>bistable</em> — almost any central input ignites a permanent
+  ~8,400-neuron storm — and four structural edits (each biologically
+  argued, no parameter tuning) kill it.</p>
+  <figure>
+    <img class="chart" src="assets/m1_acquisition.png" alt="Line chart: MBON response to the paired odor falls from about 4000 spikes to near zero across five training pairings in three seeds, while the unpaired control odor stays flat">
+    <figcaption><strong>The brain learns the association.</strong> Across
+    five odor–reward pairings the paired odor's MBON output collapses
+    99–100% (three seeds shown); the unpaired control odor is untouched.
+    Post-training discrimination is ~100:1.</figcaption>
+  </figure>
+  <figure>
+    <img class="chart" src="assets/m3_generalization_trace.png" alt="Line chart: synaptic memory trace decays smoothly as probe odors share fewer input channels with the trained odor, in both gained and parameter-free readouts">
+    <figcaption><strong>And the memory generalizes.</strong> Probe odors
+    sharing 67/50/33/0% of the trained odor's receptor channels inherit
+    proportionally graded suppression — the signature of real fly
+    generalization — measured here as the synaptic memory trace, which
+    needs <em>no</em> readout tuning (green). Full method, caveats, and
+    the bistability audit trail in the
+    <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/report.md">learning report</a>.</figcaption>
   </figure>
 
   <h2>How the demo worked</h2>
