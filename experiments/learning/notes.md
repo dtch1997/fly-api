@@ -45,3 +45,16 @@ on spike) — one ubiquitous biophysical mechanism, two parameters.
 Calibration criterion: smallest b_a that (i) kills the sustained state
 after a PN kick, while (ii) preserving the published sugar→MN9 feeding
 response as a regression test. No tuning toward the learning result.
+
+## SFA calibration (2026-09-08): FAILED the trade-off
+
+Spike-frequency adaptation cannot separate storm from signal: settings
+that kill the sustained state (b=8mV/tau=300ms; b=16mV/tau=100ms) also
+collapse the sugar regression (MN9 70Hz -> 4Hz, feeding circuit 361 ->
+~200 active). Sub-critical settings (b<=8mV/tau=100ms) leave the attractor
+alive. A rate-blind hyperpolarizing brake is the wrong tool.
+
+Next: short-term synaptic depression (Tsodyks-Markram, event-driven, all
+synapses) — punishes sustained high-rate transmission (what the storm is)
+while sparing transient volleys (what the sensory responses are).
+model_ext.py now builds the net with either mechanism.
