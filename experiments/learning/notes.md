@@ -75,3 +75,12 @@ bypasses the antennal lobe's local-interneuron gain control — plausibly
 why it ignites. Odors ARE ORN-class patterns; probe_orn.py drives 4
 disjoint ORN glomerulus classes per odor at 100Hz and checks stability +
 KC sparseness + A-vs-B code overlap.
+
+## RESULT (2026-09-08): conditioning + generalization DEMONSTRATED
+
+MB-subcircuit path succeeded — see report.md. Storm killed by 4 structural
+edits (DAN-out, KC-KC, ORN-in, eLN-out zeroing); KC codes sparse/specific/
+reliable; 3 seeds: A-suppression 99-100%, B intact, generalization graded
+(MBON readout at G=20; synaptic trace parameter-free at G=1). Driver:
+learning_driver_mb.py; probes of the dead ends retained for the audit
+trail (probe_*.py, calibrate_*.py, scan_drive.py, diagnose_ignition.py).
