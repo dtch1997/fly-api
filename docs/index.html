@@ -200,6 +200,30 @@
     <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/report.md">learning report</a>.</figcaption>
   </figure>
 
+
+  <h2>The loop, closed: navigating to the learned odor</h2>
+  <p>The finale ties everything together: the conditioned spiking brain is
+  put in the loop with the body. Two odor sources sit in the arena —
+  amber&nbsp;A (paired with reward during conditioning) and grey&nbsp;B
+  (control). Every decision step, each antenna's local odor mixture is fed
+  to the live 8,991-neuron brain, and its MBON output steers the walk.
+  Same fly, same arena, same controller — only the KC→MBON synapses
+  differ:</p>
+  <figure>
+    <video controls loop muted playsinline src="assets/nav_side_by_side.mp4"></video>
+    <figcaption><strong>Left: naive brain</strong> — no preference, walks
+    between and past both sources. <strong>Right: trained brain</strong> —
+    turns toward and reaches the rewarded odor (1.3&nbsp;mm final distance,
+    8 decisions). 0.5× speed.</figcaption>
+  </figure>
+  <figure>
+    <img class="chart" src="assets/n1_trajectories.png" alt="Top-down trajectories: naive path goes straight past both sources; trained path curves directly to the rewarded source">
+    <figcaption>Trajectories of the two rollouts. Steering polarity and
+    gain are engineered glue; the learned valence signal comes from the
+    conditioned brain, live, every sniff — details and honest caveats in
+    the <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/navigation/report.md">navigation report</a>.</figcaption>
+  </figure>
+
   <h2>How the demo worked</h2>
   <p>Two open stacks, one afternoon of glue. The brain is
   <a href="https://github.com/philshiu/Drosophila_brain_model">Shiu et&nbsp;al.'s

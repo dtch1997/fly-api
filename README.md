@@ -26,11 +26,14 @@ A fruit fly's complete wiring diagram — 139,255 neurons, 50M+ synapses
 | 🦿 | **Walking** | Anatomically detailed MuJoCo fly, tripod gait + commanded turns ([video](media/b1_walking.mp4)) |
 | 👁 | **Seeing** | Closed-loop visual pursuit from 721-ommatidia retina readings ([video](media/b2_taxis_with_retina.mp4)) |
 | 🎓 | **Learning** | Classical conditioning in the olfactory→MB pathway: 99% suppression of the rewarded odor, graded generalization with similarity ([report](experiments/learning/report.md)) |
+| 🧭 | **Navigating** | Brain-in-the-loop: the conditioned brain steers the body to the rewarded odor; naive brain shows no preference ([video](media/nav_side_by_side.mp4), [report](experiments/navigation/report.md)) |
 
 Everything runs on a **CPU-only box** — no GPU, no sudo.
 
 <p align="center">
-  <img src="media/b1_walking.gif" width="420" alt="Simulated fly walking with tripod gait">
+  <img src="media/nav_demo.gif" width="640" alt="Side by side: naive fly walks past both odor sources; trained fly navigates to the rewarded one">
+  <br>
+  <em>Brain-in-the-loop: naive vs conditioned — same fly, only the synapses differ.</em>
 </p>
 
 ## Why
