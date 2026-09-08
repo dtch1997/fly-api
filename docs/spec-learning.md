@@ -1,5 +1,9 @@
 # Spec: in-silico associative learning + generalization
 
+> **Status 2026-09-08: P0-P2 DELIVERED** (via the olfactory-MB subcircuit; whole-brain
+> blocked by a bistability we characterized — see experiments/learning/report.md).
+> P3 (color CS) and P4 (embodied) remain open.
+
 *Drafted 2026-09-08 from Daniel's question: can we teach the fly that some
 images/colors mean food and others don't — and does it generalize?*
 
