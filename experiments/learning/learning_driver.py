@@ -51,7 +51,7 @@ def main():
     here = Path(__file__).resolve().parent
     sys.path.insert(0, args.model_dir)
     from model import create_model, default_params
-    from brian2 import PoissonGroup, Synapses, Network, Hz, ms, mV, defaultclock
+    from brian2 import PoissonGroup, Synapses, Network, Hz, ms, mV, volt
 
     rng = np.random.default_rng(args.seed)
     out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
@@ -156,7 +156,7 @@ def main():
             hot = np.isin(plastic_pre, kc_active_idx)
             w = np.array(syn.w[plastic_pos])
             w[hot] *= (1 - args.eta)
-            syn.w[plastic_pos] = w
+            syn.w[plastic_pos] = w * volt
             plast_applied = True
 
         row = {
@@ -178,8 +178,8 @@ def main():
         return row
 
     # ---------------- protocol ----------------
-    meta = {'args': vars(args), 'A': A, 'B': B,
-            'probes': {k: v for k, v in probes.items()},
+    meta = {'args': vars(args), 'A': [int(x) for x in A], 'B': [int(x) for x in B],
+            'probes': {k: [int(x) for x in v] for k, v in probes.items()},
             'n_plastic': int(len(plastic_pos))}
     (out / 'meta.json').write_text(json.dumps(meta))
 
