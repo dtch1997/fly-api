@@ -50,6 +50,76 @@ Each result is a bespoke codebase. **fly-api aims to be the seam:**
 
 > load connectome → pick neuron model → attach body → train
 
+## How the fly navigates to the learned odor
+
+No policy network, no path planner. The loop, once per decision step
+(~0.15 s of walking):
+
+```
+ antenna positions ──► local odor concentrations (cA, cB)   [two Gaussian
+ (from body pose)      at the left and right antenna         odor fields]
+        │
+        ▼
+ one 150 ms "sniff" per antenna: the mixture drives odor A's and
+ odor B's ORN classes in the LIVE spiking brain (8,991 LIF neurons,
+ FlyWire wiring) ──► valence = total MBON output (avoidance drive)
+        │
+        ▼
+ steer toward the lower-valence antenna ──► descending drives
+ [left, right] into the walking controller (CPG + reflexes)
+```
+
+Because conditioning depressed exactly the KC→MBON synapses carrying the
+rewarded odor, that odor now produces *less* avoidance drive — so the
+trained fly turns toward it, sniff by sniff, and the naive fly (identical
+in every other way) has no preference. One emergent quirk we kept: deep
+inside the rewarded odor the learned depression silences the MBON signal
+on *both* antennae — the memory erases its own beacon at the goal — so
+"valence silenced while odor is strong" is treated as arrival (stop and
+feed), which is what real flies do there anyway.
+
+**What's brain and what's glue:** the valence comes from the spiking
+connectome on every sniff; the steering law (turn toward lower valence,
+gains, arrival rule) is engineered demo glue, not a model of the
+descending pathway. Details: [navigation report](experiments/navigation/report.md).
+
+## What "training" looks like
+
+For the technically minded: there is **no gradient descent, no backprop,
+no dataset** — it's the fly's own three-factor learning rule, run as-is.
+
+Three ingredients, straight from the biology:
+
+1. **CS (the odor):** six ORN glomerulus classes driven at 500 Hz for
+   0.5 s → the antennal lobe → a sparse (~1–4%), odor-specific,
+   perfectly repeatable Kenyon-cell code.
+2. **US (the reward):** PAM dopaminergic neurons driven at 60 Hz during
+   the same episode. (In this LIF model the connectome's own sugar→DAN
+   route is silent — we verified — so the reward is injected at the DANs,
+   exactly what optogenetic conditioning does in real flies.)
+3. **The plasticity rule:** dopamine-gated long-term depression at
+   KC→MBON synapses. After any episode where PAMs fired:
+
+   ```
+   for every KC→MBON synapse whose presynaptic KC spiked this episode:
+       w ← (1 − η) · w          # η = 0.5
+   ```
+
+The protocol is 5 pairings of `[odor A + dopamine]` interleaved with
+`[odor B, nothing]`, plus pre/post tests and generalization probes —
+about two minutes of wall-clock on a CPU. Pairing 1 depresses ~5.5k of
+the 62k KC→MBON synapses; later pairings touch fewer (the code is
+stable, weights just decay toward zero on it). In total ~3–7% of
+KC→MBON weight mass moves and **nothing else in the brain changes**.
+
+That tiny, targeted change is the whole memory: the trained odor's MBON
+response collapses 99–100% (3 seeds), the control odor's doesn't move,
+probes sharing 67/50/33/0% of the trained odor's input channels inherit
+proportionally graded suppression — and the same weights, dropped into
+the body loop above, produce odor-seeking behavior. Honest caveats (the
+×20 KC→MBON readout-gain for spiking readouts, uniform rather than
+compartment-specific LTD) are in the [learning report](experiments/learning/report.md).
+
 ## Quickstart
 
 ```bash
