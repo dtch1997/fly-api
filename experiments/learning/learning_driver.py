@@ -46,6 +46,8 @@ def main():
     ap.add_argument('--drive-dans', action='store_true',
                     help='US drives PAM DANs directly instead of sugar GRNs')
     ap.add_argument('--overlaps', default='75,50,25,0')
+    ap.add_argument('--keep-dan-out', action='store_true',
+                    help='keep DAN fast-excitatory outputs (default: zeroed; dopamine is neuromodulatory)')
     args = ap.parse_args()
 
     here = Path(__file__).resolve().parent
@@ -113,6 +115,15 @@ def main():
     df_con = pd.read_parquet(path_con)
     pre = df_con['Presynaptic_Index'].values
     post = df_con['Postsynaptic_Index'].values
+
+    # dopamine is neuromodulatory, not fast-excitatory: silence DAN outputs
+    if not args.keep_dan_out:
+        ppl1_idx = idx(circ['ppl1'])
+        dan_all = np.concatenate([pam_idx, ppl1_idx])
+        dan_out = np.flatnonzero(np.isin(pre, dan_all))
+        w_all = np.array(syn.w[:]); w_all[dan_out] = 0.0
+        syn.w[:] = w_all * volt
+        print(f'[build] zeroed {len(dan_out)} DAN fast-output synapses', flush=True)
     kc_set = set(kc_idx.tolist()); mbon_set = set(mbon_idx.tolist())
     plastic_mask = np.fromiter(((p in kc_set) and (q in mbon_set)
                                for p, q in zip(pre, post)), bool, len(pre))
@@ -146,7 +157,9 @@ def main():
         net.run(args.epi_sec * 1000 * ms)
         counts = np.array(spk_mon.count[:], dtype=np.int64)
         epi = counts - prev_counts
-        prev_counts = counts
+        pg.rates = np.zeros(len(drivable)) * Hz
+        net.run(200 * ms)  # washout: drain queues/settle
+        prev_counts = np.array(spk_mon.count[:], dtype=np.int64)
 
         kc_active = np.flatnonzero(epi[kc_idx] >= args.kc_thresh)
         kc_active_idx = kc_idx[kc_active]

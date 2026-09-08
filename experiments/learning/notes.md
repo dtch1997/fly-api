@@ -23,3 +23,25 @@
   run logs `kc_active`.) Tune n-pn / pn-hz if sparse or silent.
 - Plasticity magnitude (eta=0.25 x 3 pairings) is a free parameter; report
   sensitivity, don't tune to a desired result.
+
+## Finding (2026-09-08): global ignition attractor under central drive
+
+The fixed-weight LIF model is **bistable**. From silence, driving just 10
+AL projection neurons at 15 Hz for 500 ms ignites a self-sustaining global
+state — ~8,400 neurons, ~480k spikes/s — that persists indefinitely after
+all input stops (3+ s of silence, no decay). KC "coding" in this state is
+~65% dense regardless of stimulus, which would make any learning
+measurement meaningless. Zeroing DAN fast-outputs (dopamine as
+neuromodulator) is correct but insufficient — the attractor rides the
+global cholinergic recurrence.
+
+Shiu et al. never hit this because their published experiments drive
+peripheral sensory neurons (sugar: 403 active neurons, stable); the
+attractor lives downstream of central (PN) drive. This is a real
+characterization of the model's operating envelope, worth reporting.
+
+**Remedy**: uniform spike-frequency adaptation (da/dt = -a/t_a; a += b_a
+on spike) — one ubiquitous biophysical mechanism, two parameters.
+Calibration criterion: smallest b_a that (i) kills the sustained state
+after a PN kick, while (ii) preserving the published sugar→MN9 feeding
+response as a regression test. No tuning toward the learning result.
