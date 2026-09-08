@@ -103,58 +103,25 @@
 <main>
   <p class="eyebrow"><a href="index.html">fly-api</a> · mechanism explainer</p>
   <h1>How the Fly Learns</h1>
-  <p class="sub">The <a href="index.html">demo</a> shows a connectome
-  acquiring a Pavlovian memory. But a connectome is a static wiring
-  diagram — so what actually changes when the fly "learns"? This page
-  answers that precisely: which synapses update, by what rule, what
-  published biology that rule comes from, and which parts are simplifying
-  assumptions of ours rather than facts about flies.</p>
+  <p class="sub">In the <a href="index.html">demo</a>, a static wiring
+  diagram acquires a Pavlovian memory. This page walks the mechanism in the
+  order a skeptic needs it: the organ where learning happens, how we know
+  that, the map that let us rebuild it, the parametrization and update
+  rule — with each piece labeled as established biology or our
+  simplification — and finally the conditioning experiment itself.</p>
 
   <div class="qa">"How is the fly learning? What's under the hood? I
   thought we didn't have a good idea of how biological brains learned
   mechanically. How does the state actually get updated — is it realistic,
   or a hack?" — every sharp reader of the demo, correctly.</div>
 
-  <p><strong>The short answer.</strong> The persistent state is one weight
-  vector: the 62,261 Kenyon-cell→MBON connections in the mushroom body.
-  Whenever an odor's Kenyon cells fire in the same half-second episode as
-  the dopamine "reward" neurons, exactly those Kenyon cells' output
-  synapses get multiplied by (1&nbsp;−&nbsp;η). Nothing else changes.
-  That rule — dopamine-gated depression at KC→MBON synapses — is not our
-  invention: it is the experimentally established mechanism of associative
-  learning in the fly, arguably the best-understood learning mechanism in
-  any brain. Our <em>implementation</em> of it, however, is deliberately
-  minimal, and this page keeps a complete ledger of the simplifications.</p>
-
-  <h2>What a connectome contains — and what it doesn't</h2>
-  <p>The <a href="https://flywire.ai">FlyWire</a> connectome
-  (Dorkenwald et&nbsp;al. 2024) is anatomy: which neuron synapses onto
-  which, how many synapses each connection has, and a prediction of each
-  neuron's neurotransmitter (hence each connection's sign). Following
-  Shiu et&nbsp;al. 2024, we run this as a spiking network by treating
-  synapse count&nbsp;×&nbsp;sign as a fixed weight.</p>
-  <p>What a connectome does <em>not</em> contain: any learning rule.
-  Wiring diagrams are snapshots; plasticity — the machinery that changes
-  synaptic strength with experience — is invisible to electron microscopy.
-  So <strong>any</strong> connectome model that learns must have a
-  plasticity rule added by hand. The scientific question is only whether
-  the added rule is the one biology actually uses, applied at the site
-  biology actually uses. Here, it is — at cartoon resolution.</p>
-  <p>A second correct instinct: we genuinely do <em>not</em> know, at
-  mechanistic level, how most brains learn — how cortex assigns credit is
-  an open problem. The fly mushroom body is the famous exception. Two
-  decades of cell-type-specific experiments (below) pinned down the site,
-  the signal, the direction, and the behavioral consequence of the change.
-  That is exactly why this circuit is the right first learning demo for a
-  connectome.</p>
-
-  <h2>The mushroom body in ninety seconds</h2>
-  <p>The demo restricts the connectome to the olfactory pathway plus the
-  mushroom body — 8,991 neurons, 792k synapses, group sizes below taken
-  from the model itself.</p>
+  <h2>1 · The mushroom body</h2>
+  <p>Everything below happens in one structure: the mushroom body, the
+  fly's memory organ, plus the olfactory pathway feeding it. Here is the
+  circuit as the connectome wires it — group sizes are the model's own.</p>
 
   <figure>
-    <svg class="schematic" viewBox="0 0 860 330" role="img" aria-label="Circuit schematic: odor drives ORNs, then the antennal lobe, then Kenyon cells with APL feedback inhibition; Kenyon cells project to MBONs through the only plastic synapses, highlighted; dopamine neurons below gate plasticity at that synapse; MBONs bias approach or avoid.">
+<svg class="schematic" viewBox="0 0 860 330" role="img" aria-label="Circuit schematic: odor drives ORNs, then the antennal lobe, then Kenyon cells with APL feedback inhibition; Kenyon cells project to MBONs through the only plastic synapses, highlighted; dopamine neurons below gate plasticity at that synapse; MBONs bias approach or avoid.">
       <defs>
         <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/>
@@ -224,66 +191,211 @@
       <text x="616" y="196" class="sm" style="fill: var(--eye);">dopamine gates</text>
       <text x="616" y="211" class="sm" style="fill: var(--eye);">plasticity here</text>
     </svg>
-    <figcaption><strong>The circuit, as wired in FlyWire.</strong> Odor
-    identity fans out into a sparse Kenyon-cell code; the two APL neurons'
-    feedback inhibition keeps it sparse. Kenyon cells converge onto just
-    96 MBONs whose balance biases approach vs. avoid. Dopamine neurons
-    innervate the same neuropil and control which KC→MBON synapses change.
-    Group counts are the model's own
-    (<code>experiments/learning/mb_subnet_ids.json</code>).</figcaption>
+    <figcaption><strong>The olfactory→mushroom-body circuit, as wired
+    in FlyWire.</strong> Odor identity fans out into a sparse Kenyon-cell
+    code; the two APL neurons' feedback inhibition keeps it sparse. Kenyon
+    cells converge onto just 96 MBONs whose balance biases approach vs.
+    avoid. Dopamine neurons innervate the same neuropil and control which
+    KC→MBON synapses change. Counts from
+    <code>experiments/learning/mb_subnet_ids.json</code>.</figcaption>
   </figure>
 
-  <p>The computational logic, in one pass: the antennal lobe cleans up the
-  receptor signal; the 685→5,177 expansion plus APL inhibition turns each
-  odor into a small, nearly non-overlapping set of active Kenyon cells
-  (in our runs: 1–4% of KCs, overlap between two odors ≈&nbsp;1%,
-  repeat-reliability ≈&nbsp;100%). Because the code is sparse,
-  <em>changing only the active cells' output synapses</em> edits the
-  meaning of one odor without touching others. The MBONs are the dial
-  being edited: depress the active-KC→MBON synapses and that specific
-  odor's grip on those MBONs weakens — which real flies read out as a
-  changed approach/avoid bias.</p>
+  <p>Read it left to right. Olfactory receptor neurons (ORNs) each express
+  one receptor type; the antennal lobe pools them by type and cleans up
+  the signal. Its 685 projection neurons then fan out onto 5,177 Kenyon
+  cells (KCs), each of which listens to a handful of random inputs and
+  fires only when several agree — and the two giant APL neurons feed
+  inhibition back so that only the best-matched cells win. The result is
+  a <em>sparse code</em>: each odor lights up a small, nearly unique set
+  of KCs (in our runs 1–4% of them, with ~1% overlap between two odors
+  and ~100% repeatability). Every KC then synapses onto a few of the 96
+  mushroom-body output neurons (MBONs), whose relative activity biases the
+  fly toward or away from whatever it is smelling. Dopamine neurons
+  (DANs) — 307 in the PAM cluster, 16 in PPL1 — carry reward and
+  punishment into the same tissue.</p>
+  <p>The design logic: because the KC code is sparse, changing only the
+  <em>active</em> cells' output synapses edits what one odor means to the
+  MBONs without touching any other odor. The KC→MBON synapse is the dial;
+  dopamine is the hand that turns it.</p>
 
-  <h2>The mechanism, as biology established it</h2>
-  <p>This is the part that surprises people: for this one circuit, the
-  field really does know the learning rule. The key results, each from
-  cell-type-specific experiments in living flies:</p>
+  <h2>2 · How we know this is where the fly learns</h2>
+  <p>A fair objection is that we do not know, mechanistically, how most
+  brains learn — how cortex assigns credit remains open. The fly mushroom
+  body is the well-known exception. Two decades of cell-type-specific
+  experiments in living flies pinned down the site, the signal, the
+  direction, and the behavioral readout of the change:</p>
   <ul>
-    <li><strong>The site.</strong> Memory formation localizes to the
-    mushroom body (Heisenberg 2003 for the classical evidence), and the
-    anatomy — sparse KC code, 15 compartments each pairing specific DANs
-    with specific MBONs — reads as an architecture <em>for</em>
-    associative learning (Aso et&nbsp;al. 2014a).</li>
+    <li><strong>The site.</strong> Mutants and lesions localize olfactory
+    memory to the mushroom body (Heisenberg 2003 reviews the classical
+    evidence), and its anatomy — a sparse KC code feeding 15 compartments,
+    each pairing specific DANs with specific MBONs — reads as an
+    architecture built for associative learning (Aso et&nbsp;al.
+    2014a).</li>
     <li><strong>The signal.</strong> Dopamine neurons carry the
     reinforcement: PAM-cluster DANs signal reward, PPL1-cluster DANs
-    punishment. Driving them optogenetically in place of real sugar or
-    shock writes a memory (Claridge-Chang et&nbsp;al. 2009; Aso
-    et&nbsp;al. 2014b) — which is why our injected "US" below is a
-    legitimate move, not a cheat.</li>
+    punishment. Activating them optogenetically <em>in place of</em> real
+    sugar or shock writes a memory (Claridge-Chang et&nbsp;al. 2009; Aso
+    et&nbsp;al. 2014b). This is why our simulated reward can be delivered
+    at the DANs directly (§5).</li>
     <li><strong>The change.</strong> Pairing an odor with DAN activity
     <em>depresses</em> the synapses from that odor's Kenyon cells onto the
-    compartment's MBON — measured directly with electrophysiology (Hige
+    compartment's MBON — measured directly by patch-clamp (Hige
     et&nbsp;al. 2015). Depression, not potentiation: the fly learns by
-    turning down the losing option's dial.</li>
+    turning down a dial.</li>
     <li><strong>The gate.</strong> Dopamine release is compartmentalized
     and state-dependent (Cohn et&nbsp;al. 2015), and the sign and timing
-    of plasticity follow from two dopamine receptors with different
-    kinetics (Handler et&nbsp;al. 2019) — coincidence detection is
-    implemented in receptor biochemistry.</li>
+    of the plasticity follow from two dopamine receptors with different
+    kinetics (Handler et&nbsp;al. 2019) — the coincidence detector is
+    receptor biochemistry.</li>
   </ul>
-  <p>Modi, Shuai &amp; Turner (2020) review the whole story under the
-  apt title "from architecture to algorithm." Computational models built
-  on this rule are themselves an established genre (e.g. Bennett
-  et&nbsp;al. 2021). So the demo's learning rule has a citation trail;
-  what it doesn't have is biophysical resolution — next section.</p>
+  <p>Modi, Shuai &amp; Turner (2020) review the full story as "from
+  architecture to algorithm," and computational models built on this rule
+  are an established genre (e.g. Bennett et&nbsp;al. 2021). So the rule
+  we implement has a citation trail. What it lacks is biophysical
+  resolution — §4 keeps the ledger.</p>
 
-  <h2>What the simulation actually does</h2>
-  <p>Learning happens in discrete <em>episodes</em>, not continuously.
-  One episode = half a second of simulated spiking, then a bookkeeping
-  step in plain numpy:</p>
+  <h2>3 · The map that lets us rebuild it</h2>
+  <p>Three published resources turn that biology into something we can
+  run:</p>
+  <ul>
+    <li><strong>The wiring.</strong> FlyWire (Dorkenwald et&nbsp;al. 2024)
+    is an electron-microscopy reconstruction of one adult female fly
+    brain: all 139,255 neurons and ~50 million synapses, proofread by a
+    community. For every pair of neurons it gives the synapse count.</li>
+    <li><strong>The labels.</strong> Schlegel et&nbsp;al. 2024 annotate
+    every neuron with a cell class and type. That is how we know which
+    of the 139,255 are ORNs, Kenyon cells, MBONs, or PAM dopamine neurons —
+    the groups in the diagram are selected by those labels, not by
+    us.</li>
+    <li><strong>The dynamics.</strong> Shiu et&nbsp;al. 2024 turn the map
+    into a spiking model: every neuron is a leaky integrate-and-fire unit,
+    every connection's weight is its synapse count times the sign of the
+    predicted neurotransmitter. This model reproduces known sensorimotor
+    responses (sugar → proboscis extension) with no fitting, and it is
+    the substrate for everything here.</li>
+  </ul>
+  <p>What the map does <em>not</em> contain matters just as much. A
+  connectome is a snapshot of anatomy. It records no learning rule, no
+  receptor identities, no neuromodulator release, no gap junctions.
+  Plasticity — the machinery that changes synaptic strength with
+  experience — is invisible to electron microscopy. So <strong>any</strong>
+  connectome model that learns has a rule added by hand. The scientific
+  question is whether the added rule is the one biology uses, at the
+  site biology uses. Here, it is — at cartoon resolution.</p>
+  <p>For the learning demo we cut the map down to the olfactory pathway
+  plus the mushroom body: 8,991 neurons and 792k synapses. Doing so
+  surfaced a finding of its own — the published whole-brain model is
+  bistable, and almost any central input tips it into a permanent
+  ~8,400-neuron storm. Four structural edits, each biologically argued
+  and none a parameter fit, remove the storm while leaving odor coding
+  intact; they are listed in the ledger below and audited in
+  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/notes.md">notes.md</a>.</p>
+
+  <h2>4 · Parametrization and the update rule</h2>
+  <p><strong>The fixed part.</strong> Every neuron obeys Shiu
+  et&nbsp;al.'s leaky integrate-and-fire equation with their published
+  constants, unchanged: resting and reset potential −52&nbsp;mV,
+  threshold −45&nbsp;mV, membrane time constant 20&nbsp;ms, synaptic
+  decay 5&nbsp;ms, refractory period 2.2&nbsp;ms, transmission delay
+  1.8&nbsp;ms. Each connection contributes 0.275&nbsp;mV per synapse,
+  positive or negative by predicted transmitter. We tuned none of these.
+  Odors and reward enter as Poisson spike trains injected into the named
+  neurons.</p>
+  <p><strong>The plastic part.</strong> Exactly one class of connection is
+  allowed to change: the 62,261 Kenyon-cell→MBON connections. Their
+  weights start at the connectome value and are the only quantity that
+  persists from one episode to the next — the fly's memory <em>is</em>
+  this vector. The update rule, verbatim from
+  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/learning_driver_mb.py"><code>learning_driver_mb.py</code></a>:</p>
+  <pre class="codeblock"><code>kc_active_idx = g['kc'][np.flatnonzero(epi[g['kc']] >= args.kc_thresh)]
+pam_hz = float(epi[g['pam']].mean() / args.epi_sec)
+if us and pam_hz >= args.pam_gate_hz:          # dopamine present this episode?
+    hot = np.isin(plastic_pre, kc_active_idx)  # synapses from the odor's active KCs
+    wp[hot] *= (1 - args.eta)                  # depress them: w ← (1 − η) · w
+    syn.w[plastic_pos] = wp * volt</code></pre>
+  <p>In words: after each half-second episode, if the PAM dopamine neurons
+  fired, every synapse from a Kenyon cell that was active in that episode
+  onto any MBON is multiplied by (1&nbsp;−&nbsp;η), with η&nbsp;=&nbsp;0.5
+  in the headline runs. That multiply is the whole algorithm. There is no
+  objective function, no gradient, no training loop in the
+  machine-learning sense, and no hidden state beyond the weights.</p>
+  <p><strong>Accurate or simplified?</strong> The three things that make
+  it the fly's rule and not a generic one all match §2: the <em>site</em>
+  (KC→MBON), the <em>signal</em> (dopamine coincident with the odor's KC
+  code), and the <em>direction</em> (depression). Everything about the
+  <em>resolution</em> is our abstraction. The ledger:</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Aspect</th><th>Real fly</th><th>This model</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Synaptic weight</td>
+        <td>Conductances, receptor content, short-term dynamics</td>
+        <td>Synapse count × predicted transmitter sign (Shiu 2024)</td>
+        <td>Crude proxy; underlies the readout-gain caveat below</td>
+      </tr>
+      <tr>
+        <td>Substrate stability</td>
+        <td>Stable via neuromodulation, gap junctions, adaptation — none in the wiring diagram</td>
+        <td>Four structural edits: DAN fast outputs → 0; KC→KC → 0; ORN afferents input-only; excitatory AL local-neuron outputs → 0</td>
+        <td>The substrate needed surgery before learning was testable — a finding about connectome models, not flies</td>
+      </tr>
+      <tr>
+        <td>Dopamine's fast action</td>
+        <td>DANs also make fast synapses (co-transmission)</td>
+        <td>Zeroed (edit above); dopamine acts <em>only</em> through the scripted rule</td>
+        <td>Clean separation, but neuromodulation exists only where we wrote it in</td>
+      </tr>
+      <tr>
+        <td>Update dynamics</td>
+        <td>Continuous, receptor-mediated; sign and size depend on odor–dopamine <em>timing</em> at sub-second resolution (Handler 2019)</td>
+        <td>One batch multiply between 0.5&nbsp;s episodes; coincidence = "same episode"</td>
+        <td>Timing-dependence (forward vs. backward pairing) cannot emerge</td>
+      </tr>
+      <tr>
+        <td>Dopamine signal</td>
+        <td>Compartmentalized: 15 compartments, each DAN type writing to its own MBON zone, opposite valences in parallel (Aso 2014, Cohn 2015)</td>
+        <td>One scalar gate — mean PAM rate ≥ 1&nbsp;Hz — and one uniform η for all KC→MBON synapses</td>
+        <td>No appetitive/aversive asymmetry, no parallel memory traces</td>
+      </tr>
+      <tr>
+        <td>Direction of change</td>
+        <td>Bidirectional: depression <em>and</em> recovery; memories decay and extinguish</td>
+        <td>Depression only, permanent</td>
+        <td>Extinction, forgetting, re-learning out of scope</td>
+      </tr>
+      <tr>
+        <td>Reward pathway</td>
+        <td>Sugar sensing recruits PAM DANs through circuitry</td>
+        <td>PAMs driven directly at 60&nbsp;Hz — the connectome's own sugar→PAM route is silent in this LIF regime (measured: PAMs at 0&nbsp;Hz under sugar)</td>
+        <td>Mirrors optogenetic conditioning, a real paradigm — but the natural reward path is not demonstrated</td>
+      </tr>
+      <tr>
+        <td>Behavioral readout</td>
+        <td>MBON compartment balance → downstream motor bias</td>
+        <td>MBON spike counts, with a ×20 efficacy correction on KC→MBON synapses; the synaptic-trace readout needs no correction</td>
+        <td>Headline % depends on readout choice; the parameter-free trace shows the same gradient (<a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/report.md">report</a>)</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>5 · Pavlovian conditioning, and how we simulate it</h2>
+  <p>Pavlov's dog heard a bell (the <em>conditioned stimulus</em>, CS)
+  just before food (the <em>unconditioned stimulus</em>, US), and after a
+  few pairings salivated to the bell alone. Flies do the same with odors.
+  In the classic assay (Tully &amp; Quinn 1985) a group of flies smells
+  odor&nbsp;A while receiving sugar or shock, then odor&nbsp;B with
+  nothing, and is later given a choice between A and B in a T-maze; the
+  fraction that moves toward or away from A is the memory score. The
+  unpaired odor B is the control: it experiences everything except the
+  odor–reinforcement coincidence. Since Claridge-Chang et&nbsp;al. 2009
+  the US can be replaced by light-activating the dopamine neurons
+  themselves — the fly learns just the same.</p>
+  <p>Our simulation follows that design one episode at a time:</p>
 
   <figure>
-    <svg class="schematic" viewBox="0 0 860 250" role="img" aria-label="Four-step loop: simulate half a second of spiking; record spike counts; gate on dopamine — did PAM neurons fire; update weights by multiplying active Kenyon cells' MBON synapses by one minus eta. A return arrow notes that voltages reset between episodes and only the weights persist.">
+<svg class="schematic" viewBox="0 0 860 250" role="img" aria-label="Four-step loop: simulate half a second of spiking; record spike counts; gate on dopamine — did PAM neurons fire; update weights by multiplying active Kenyon cells' MBON synapses by one minus eta. A return arrow notes that voltages reset between episodes and only the weights persist.">
       <defs>
         <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/>
@@ -327,107 +439,56 @@
     real flies.</figcaption>
   </figure>
 
-  <p>The entire learning algorithm, verbatim from
-  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/learning_driver_mb.py"><code>learning_driver_mb.py</code></a>
-  (η&nbsp;=&nbsp;0.5 in the headline runs):</p>
-  <pre class="codeblock"><code>kc_active_idx = g['kc'][np.flatnonzero(epi[g['kc']] >= args.kc_thresh)]
-pam_hz = float(epi[g['pam']].mean() / args.epi_sec)
-if us and pam_hz >= args.pam_gate_hz:          # dopamine present?
-    hot = np.isin(plastic_pre, kc_active_idx)  # this odor's KCs
-    wp[hot] *= (1 - args.eta)                  # depress their MBON synapses
-    syn.w[plastic_pos] = wp * volt</code></pre>
-  <p>That multiply is the whole thing. There is no gradient, no objective
-  function, no training loop in the machine-learning sense — and no
-  hidden state beyond the weights themselves.</p>
-  <p>The full protocol around it: two pre-tests of each odor; five
-  pairings of odor&nbsp;A&nbsp;+&nbsp;PAM drive, interleaved with
-  unpaired presentations of odor&nbsp;B (the control — it experiences
-  everything except the odor–dopamine coincidence); two post-tests; then
-  probe odors sharing 67/50/33/0% of A's receptor classes. Tests and
-  probes deliver no US, so they induce no plasticity. Five pairings at
-  η&nbsp;=&nbsp;0.5 compound to ~97% depression per trained synapse —
-  hence the ~99% collapse of A's MBON response while B is untouched.</p>
-  <p>And the generalization result is where the connectome earns its
-  keep: nothing in the rule says probes should inherit graded
-  suppression. That gradient falls out of the real wiring — probe odors
-  sharing receptor classes with A recruit overlapping Kenyon cells, so
-  they inherit exactly the depressed synapses they share. The
-  <em>rule</em> is imposed; the <em>geometry of the memory</em> is the
-  fly's.</p>
-
-  <h2>The assumptions ledger</h2>
-  <p>Every place our implementation is a cartoon of the biology, and why
-  it matters:</p>
-  <div class="tablewrap">
-  <table>
-    <thead><tr><th>Aspect</th><th>Real fly</th><th>This model</th><th>Consequence</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>Update dynamics</td>
-        <td>Continuous, receptor-mediated; sign and magnitude depend on odor–dopamine <em>timing</em> at sub-second resolution (Handler 2019)</td>
-        <td>One batch multiply between 0.5&nbsp;s episodes; coincidence = "same episode"</td>
-        <td>Timing-dependence (forward vs. backward pairing) cannot emerge here</td>
-      </tr>
-      <tr>
-        <td>Dopamine signal</td>
-        <td>Compartmentalized: 15 MB compartments, each DAN type writing to its own MBON zone, opposite valences in parallel (Aso 2014, Cohn 2015)</td>
-        <td>One scalar gate — mean PAM rate ≥ 1&nbsp;Hz — and one uniform η for all KC→MBON synapses</td>
-        <td>No appetitive/aversive asymmetry, no parallel memory traces</td>
-      </tr>
-      <tr>
-        <td>Direction of change</td>
-        <td>Bidirectional: depression <em>and</em> recovery/potentiation; memories decay and extinguish</td>
-        <td>Depression only, permanent</td>
-        <td>Extinction, forgetting, and re-learning are out of scope</td>
-      </tr>
-      <tr>
-        <td>Reward pathway</td>
-        <td>Sugar sensing recruits PAM DANs through circuitry</td>
-        <td>PAMs driven directly at 60&nbsp;Hz — the connectome's own sugar→PAM route is silent in this LIF regime (measured)</td>
-        <td>Mirrors optogenetic conditioning (a real, published paradigm) — but the natural reward path is not demonstrated</td>
-      </tr>
-      <tr>
-        <td>Dopamine's fast action</td>
-        <td>DANs also make fast synapses (co-transmission)</td>
-        <td>DAN fast outputs zeroed (stability edit); dopamine acts <em>only</em> through the scripted rule</td>
-        <td>Clean separation, but neuromodulation exists only where we wrote it in</td>
-      </tr>
-      <tr>
-        <td>Synaptic weight</td>
-        <td>Conductances, receptor content, short-term dynamics</td>
-        <td>Synapse count × predicted transmitter sign (Shiu 2024)</td>
-        <td>Crude proxy; underlies the readout-gain caveat below</td>
-      </tr>
-      <tr>
-        <td>Behavioral readout</td>
-        <td>MBON compartment balance → downstream motor bias</td>
-        <td>MBON spike counts, with a ×20 efficacy correction on KC→MBON synapses; the synaptic-trace readout needs no correction</td>
-        <td>Headline % depends on readout choice; the parameter-free trace shows the same gradient (see <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/report.md">report</a>)</td>
-      </tr>
-      <tr>
-        <td>Substrate stability</td>
-        <td>Stable via neuromodulation, gap junctions, adaptation — none in the wiring diagram</td>
-        <td>Four structural edits to kill a global ignition attractor in the published model (each biologically argued; audit in <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/notes.md">notes.md</a>)</td>
-        <td>The substrate needed surgery before learning was even testable — a finding about connectome models, not about flies</td>
-      </tr>
-    </tbody>
-  </table>
-  </div>
+  <ul>
+    <li><strong>CS</strong> — an odor is a disjoint set of six ORN receptor
+    classes (chosen by seed, balanced by count) driven at 500&nbsp;Hz for
+    0.5&nbsp;s. Odor&nbsp;A is the one to be learned; odor&nbsp;B shares no
+    receptor classes with it.</li>
+    <li><strong>US</strong> — reward is the 307 PAM dopamine neurons driven
+    at 60&nbsp;Hz during the same 0.5&nbsp;s, exactly as optogenetic
+    conditioning does (and, per the ledger, because the model's own
+    sugar→PAM route is silent).</li>
+    <li><strong>Protocol</strong> — two pre-tests of A and of B; five
+    pairings of A&nbsp;+&nbsp;US, each interleaved with an unpaired
+    presentation of B; two post-tests; then four probe odors sharing
+    67/50/33/0% of A's receptor classes. Tests and probes deliver no US, so
+    they induce no plasticity.</li>
+    <li><strong>Conditioned response</strong> — we cannot watch a
+    simulated fly walk to a T-maze arm here (the
+    <a href="index.html">navigation demo</a> does that), so the readout is
+    the MBON population's spike response to the odor: the quantity that,
+    in a real fly, sets the approach/avoid bias.</li>
+  </ul>
+  <p>Five pairings at η&nbsp;=&nbsp;0.5 compound to ~97% depression on
+  each trained synapse, which is why A's MBON response collapses ~99%
+  while B's — whose Kenyon cells were never active during dopamine — is
+  untouched. Between episodes the membrane voltages and synaptic
+  conductances are reset; only the KC→MBON weights carry over. When the
+  demo says the brain "remembers," that vector is the memory.</p>
+  <p>The generalization result is where the connectome earns its keep.
+  Nothing in the rule says probe odors should inherit graded suppression.
+  The gradient falls out of the wiring: a probe sharing receptor classes
+  with A recruits overlapping Kenyon cells and therefore inherits exactly
+  the depressed synapses it shares — the same generalization gradient
+  real flies show. The <em>rule</em> is imposed; the <em>geometry of the
+  memory</em> is the fly's.</p>
 
   <div class="note"><strong>So: realistic or a hack?</strong> Both,
-  cleanly separated. The <em>site</em> (KC→MBON), <em>signal</em>
-  (dopamine coincident with the odor's KC code), and <em>direction</em>
-  (depression) match the established biology point for point, and the
-  generalization structure is inherited from real wiring rather than
-  built in. The <em>resolution</em> — episodic batch updates, one scalar
-  gate, one η, LTD-only — is a hand-coded abstraction, chosen to be the
-  simplest rule the evidence supports. What would falsify the "realistic"
-  claim: if the result depended on the abstraction's knobs. The one place
-  it partly does (readout gain) is flagged above and in the report; the
+  cleanly separated. The site, signal, and direction of the change match
+  the established biology of §2 point for point, and the generalization
+  structure is inherited from the real wiring of §3 rather than built in.
+  The resolution — episodic batch updates, one scalar gate, one η,
+  depression only — is a hand-coded abstraction, chosen as the simplest
+  rule the evidence supports. What would falsify the "realistic" claim is
+  a result that depends on the abstraction's knobs; the one place that
+  partly holds (readout gain) is flagged in the ledger, and the
   generalization gradient survives with no tuned parameters at all.</div>
 
   <h2>References</h2>
   <ol class="refs">
+    <li>Tully &amp; Quinn (1985). Classical conditioning and retention in
+    normal and mutant Drosophila melanogaster. <em>J Comp Physiol A</em>.
+    <a href="https://doi.org/10.1007/BF01350033">doi:10.1007/BF01350033</a></li>
     <li>Heisenberg (2003). Mushroom body memoir: from maps to models.
     <em>Nat Rev Neurosci</em>. <a href="https://doi.org/10.1038/nrn1074">doi:10.1038/nrn1074</a></li>
     <li>Claridge-Chang et&nbsp;al. (2009). Writing memories with
