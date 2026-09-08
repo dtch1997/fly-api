@@ -152,26 +152,14 @@
 <main>
   <p class="eyebrow"><a href="index.html">fly-api</a> · plain-language explainer</p>
   <h1>How the Fly Learns</h1>
-  <p class="sub">The <a href="index.html">demo</a> shows a computer model of a
-  fruit fly's brain learning that one smell means a treat is coming. But
-  the model was built from a wiring diagram — a map of the brain, not the
-  brain itself. So what actually changes when it "learns"? The short
-  answer: a small set of connections gets weaker, by the same rule real
-  flies use. This page explains that in plain terms. The numbered notes
-  hold the technical detail for anyone who wants it.</p>
+  <p class="sub">The <a href="index.html">demo</a>'s fly brain learns that
+  one smell means a treat is coming. But the model is a wiring diagram — a
+  map of a brain, not a brain. So what actually changes when it learns?
+  A small set of connections gets weaker, by the rule real flies use.
+  Five pictures tell the story; the numbered notes hold the detail.</p>
   <p class="sidehint">On a phone, tap a note number to open it.</p>
 
-  <div class="qa">"How is the fly learning? What's under the hood? I
-  thought we didn't have a good idea of how biological brains learned
-  mechanically. Is it realistic, or a hack?" — a friend, on seeing the
-  demo. A fair question.</div>
-
   <h2>1 · The fly's memory organ</h2>
-  <p>Deep in a fruit fly's head sit two small structures called
-  <em>mushroom bodies</em>, named for their shape. This is where the fly
-  stores what smells mean. Here is the circuit, drawn from the actual
-  wiring diagram of a fly brain:</p>
-
   <figure class="wide">
     <svg class="schematic" viewBox="0 0 860 330" role="img" aria-label="Circuit schematic: a smell drives sensor cells, then a sorting station, then memory cells with feedback inhibition keeping them sparse; memory cells connect to decision cells through the only connections that can change, highlighted; reward cells below control whether those connections change; decision cells vote approach or avoid.">
       <defs>
@@ -236,210 +224,213 @@
       <text x="616" y="196" class="sm" style="fill: var(--eye);">"change these</text>
       <text x="616" y="211" class="sm" style="fill: var(--eye);">connections now"</text>
     </svg>
-    <figcaption><strong>The smell-to-memory circuit</strong>, with the
-    number of cells of each kind in our model. Amber marks the one place
-    where connections are allowed to change. Red marks the cells that give
-    the order to change them.</figcaption>
+    <figcaption><strong>The smell-to-memory circuit</strong>, from the
+    fly's actual wiring diagram, with the number of cells of each kind in
+    our model. Amber: the only connections that change. Red: the cells
+    that order the change.</figcaption>
   </figure>
-
-  <p>Read it left to right. A smell lands on a couple of thousand
-  <strong>sensor cells</strong> in the antennae. A <strong>sorting
-  station</strong> tidies the signal. Then it fans out across about five
-  thousand <strong>memory cells</strong> — but a built-in damper makes
-  sure only a few dozen of them wake up for any given smell, and a
-  different few dozen for each smell.<span class="sn-ref"><label
-  class="sn-num" for="sn1"></label><input type="checkbox" id="sn1"
-  class="sn-toggle"><span class="sidenote">The memory cells are Kenyon
-  cells (KCs). Each listens to a random handful of the 685 projection
-  neurons leaving the antennal lobe and fires only when several agree;
-  the two giant APL neurons feed inhibition back so only the
-  best-matched cells win. This is <em>sparse coding</em>. In our runs
-  each odor activates 1–4% of KCs, two odors' codes overlap by about
-  1% (Jaccard 0.01), and the same odor gives the same code every time
-  (Jaccard 1.00).</span></span> Every memory cell is wired to a handful
-  of about a hundred <strong>decision cells</strong>, and the decision
-  cells vote: move toward this smell, or away from it. Finally, a group of
-  <strong>reward cells</strong> fire when something good happens to the
-  fly, like tasting sugar.<span class="sn-ref"><label class="sn-num"
-  for="sn2"></label><input type="checkbox" id="sn2" class="sn-toggle"><span
-  class="sidenote">The decision cells are mushroom-body output neurons
-  (MBONs), 96 of them in 35 types. The reward cells are dopamine neurons:
-  307 in the PAM cluster (reward) and 16 in PPL1 (punishment). All
-  counts come from the model's cell-type labels
-  (<code>experiments/learning/mb_subnet_ids.json</code>).</span></span></p>
-
-  <div class="keyidea"><strong>The key idea.</strong> Each smell has its own
-  small crew of memory cells, and each memory cell has connections to the
-  decision cells. Those connections are the knobs. Turn down the knobs on
-  one smell's crew, and that smell's grip on the decision changes —
-  without touching any other smell. Reward cells are the hand that turns
-  the knobs.</div>
+  <p>A smell wakes a few dozen of the five thousand memory cells — a
+  different few dozen for each smell.<span class="sn-ref"><label class="sn-num" for="sn1"></label><input type="checkbox" id="sn1" class="sn-toggle"><span class="sidenote">The memory cells are Kenyon cells (KCs). Each listens to a random handful of the 685 projection neurons leaving the antennal lobe and fires only when several agree; the two giant APL neurons feed inhibition back so only the best-matched cells win (<em>sparse coding</em>). In our runs each odor activates 1–4% of KCs, two odors' codes overlap by ~1% (Jaccard 0.01), and the same odor gives the same code every time (Jaccard 1.00).</span></span>
+  Each memory cell connects to a few of about a hundred decision cells,
+  which vote approach or avoid; reward cells fire when something good
+  happens.<span class="sn-ref"><label class="sn-num" for="sn2"></label><input type="checkbox" id="sn2" class="sn-toggle"><span class="sidenote">Decision cells = mushroom-body output neurons (MBONs), 96 in 35 types. Reward cells = dopamine neurons: 307 PAM (reward) and 16 PPL1 (punishment). Counts come from the model's cell-type labels (<code>experiments/learning/mb_subnet_ids.json</code>).</span></span>
+  Those memory-to-decision connections are the knobs. Reward cells are the
+  hand that turns them.</p>
 
   <h2>2 · How do we know this is where flies learn?</h2>
-  <p>It is true that for most brains, including ours, nobody knows the
-  mechanism of learning at this level of detail. The fly mushroom body is
-  the famous exception. Fly researchers can switch specific cells on and
-  off with light and genetics, and record from single cells while the fly
-  learns. Over twenty years, that toolkit produced four findings:</p>
-  <ul>
-    <li><strong>Break the mushroom body and the fly can't learn
-    smells.</strong> Mutants and lesions localized smell-memory here long
-    before anyone could watch it happen.<span class="sn-ref"><label
-    class="sn-num" for="sn3"></label><input type="checkbox" id="sn3"
-    class="sn-toggle"><span class="sidenote">Heisenberg 2003 reviews the
-    classical mutant and lesion evidence. Aso et&nbsp;al. 2014a then
-    showed the anatomy reads as an architecture <em>for</em> learning:
-    the sparse KC code feeds 15 compartments, each pairing specific
-    dopamine neurons with specific MBONs.</span></span></li>
-    <li><strong>Flashing the reward cells works as well as sugar.</strong>
-    Shine light on the reward cells while the fly smells something, and
-    it learns to like that smell — no sugar involved.<span
-    class="sn-ref"><label class="sn-num" for="sn4"></label><input
-    type="checkbox" id="sn4" class="sn-toggle"><span class="sidenote">Claridge-Chang
-    et&nbsp;al. 2009 ("Writing memories with light-addressable
-    reinforcement circuitry"); Aso et&nbsp;al. 2014b mapped which
-    dopamine neurons write reward vs. punishment. This optogenetic
-    substitution is why our simulation can deliver reward directly at
-    the dopamine neurons (§5).</span></span></li>
-    <li><strong>The knobs really do turn down.</strong> Recording a
-    decision cell before and after training shows the connections from
-    the trained smell's memory cells get <em>weaker</em>. Weaker, not
-    stronger: the fly learns by turning a dial down.<span
-    class="sn-ref"><label class="sn-num" for="sn5"></label><input
-    type="checkbox" id="sn5" class="sn-toggle"><span class="sidenote">Hige
-    et&nbsp;al. 2015 measured this by patch-clamp: pairing an odor with
-    dopamine-neuron activity depresses that odor's KC→MBON synapses in the
-    matching compartment. Depression of the "wrong" output is the
-    established sign of the change.</span></span></li>
-    <li><strong>Dopamine is the trigger.</strong> The reward cells release
-    dopamine onto exactly these connections, and the chemistry of the
-    dopamine receptors is what detects "smell and reward at the same
-    time."<span class="sn-ref"><label class="sn-num" for="sn6"></label><input
-    type="checkbox" id="sn6" class="sn-toggle"><span class="sidenote">Cohn,
-    Morantte &amp; Ruta 2015 showed dopamine release is compartmentalized
-    and state-dependent; Handler et&nbsp;al. 2019 showed the sign and
-    timing of the plasticity follow from two dopamine receptors with
-    different kinetics. Modi, Shuai &amp; Turner 2020 review the whole
-    story; Bennett et&nbsp;al. 2021 is one of several computational
-    models built on this rule.</span></span></li>
-  </ul>
-  <p>So when we say the model uses "the fly's real learning rule," this is
-  what we mean: same place, same trigger, same direction of change.</p>
+  <figure class="wide">
+    <svg class="schematic" viewBox="0 0 860 250" role="img" aria-label="Four experiments: damaging the memory organ abolishes smell memory; flashing the reward cells with light instead of sugar still teaches the fly; recording a connection before and after training shows it weaker; dopamine from the reward cells is the trigger.">
+      <defs>
+        <marker id="e-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker>
+        <marker id="e-arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--eye)"/></marker>
+      </defs>
+      <!-- panel 1: break it -->
+      <rect x="16" y="14" width="196" height="222" rx="3" class="box"/>
+      <text x="114" y="38" text-anchor="middle" class="lbl">1 · break it</text>
+      <rect x="64" y="70" width="100" height="44" rx="3" class="box"/>
+      <text x="114" y="96" text-anchor="middle" class="sm">memory organ</text>
+      <line x1="70" y1="74" x2="158" y2="110" class="dopa"/><line x1="158" y1="74" x2="70" y2="110" class="dopa"/>
+      <line x1="114" y1="118" x2="114" y2="150" class="wire" marker-end="url(#e-arr)"/>
+      <text x="114" y="170" text-anchor="middle" class="sm">no smell memory</text>
+      <text x="114" y="186" text-anchor="middle" class="sm">(everything else works)</text>
+      <text x="114" y="222" text-anchor="middle" class="mono">Heisenberg 2003</text>
+      <!-- panel 2: flash it -->
+      <rect x="226" y="14" width="196" height="222" rx="3" class="box"/>
+      <text x="324" y="38" text-anchor="middle" class="lbl">2 · fake the reward</text>
+      <text x="262" y="78" class="sm">smell</text>
+      <line x1="298" y1="74" x2="322" y2="74" class="wire" marker-end="url(#e-arr)"/>
+      <text x="286" y="132" class="sm" style="fill: var(--amber);">light ⚡</text>
+      <line x1="330" y1="128" x2="348" y2="128" class="hot" marker-end="url(#e-arr)"/>
+      <rect x="352" y="108" width="60" height="40" rx="3" class="box dopa"/>
+      <text x="382" y="126" text-anchor="middle" class="sm">reward</text>
+      <text x="382" y="140" text-anchor="middle" class="sm">cells</text>
+      <text x="324" y="180" text-anchor="middle" class="sm">no sugar at all —</text>
+      <text x="324" y="196" text-anchor="middle" class="sm">the fly learns the smell anyway</text>
+      <text x="324" y="222" text-anchor="middle" class="mono">Claridge-Chang 2009 · Aso 2014</text>
+      <!-- panel 3: record it -->
+      <rect x="436" y="14" width="196" height="222" rx="3" class="box"/>
+      <text x="534" y="38" text-anchor="middle" class="lbl">3 · listen to the knob</text>
+      <circle cx="470" cy="84" r="9" class="box"/><rect x="580" y="72" width="30" height="24" rx="3" class="box"/>
+      <line x1="479" y1="84" x2="580" y2="84" stroke="var(--ink)" stroke-width="5"/>
+      <text x="530" y="70" text-anchor="middle" class="sm">before training</text>
+      <circle cx="470" cy="150" r="9" class="box" style="fill: var(--ink2);"/><rect x="580" y="138" width="30" height="24" rx="3" class="box"/>
+      <line x1="479" y1="150" x2="580" y2="150" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="530" y="136" text-anchor="middle" class="sm">after training</text>
+      <text x="534" y="188" text-anchor="middle" class="sm">memory → decision connection</text>
+      <text x="534" y="202" text-anchor="middle" class="sm">gets <tspan font-weight="600">weaker</tspan>, not stronger</text>
+      <text x="534" y="222" text-anchor="middle" class="mono">Hige 2015</text>
+      <!-- panel 4: dopamine -->
+      <rect x="646" y="14" width="196" height="222" rx="3" class="box"/>
+      <text x="744" y="38" text-anchor="middle" class="lbl">4 · the trigger</text>
+      <circle cx="680" cy="90" r="9" class="box" style="fill: var(--ink2);"/><rect x="790" y="78" width="30" height="24" rx="3" class="box"/>
+      <line x1="689" y1="90" x2="790" y2="90" stroke="var(--ink)" stroke-width="3"/>
+      <rect x="714" y="130" width="60" height="34" rx="3" class="box dopa"/>
+      <text x="744" y="151" text-anchor="middle" class="sm">dopamine</text>
+      <path d="M 744 130 L 744 98" class="dopa" fill="none" marker-end="url(#e-arrD)"/>
+      <text x="744" y="188" text-anchor="middle" class="sm">receptors on the connection</text>
+      <text x="744" y="202" text-anchor="middle" class="sm">detect "smell + reward together"</text>
+      <text x="744" y="222" text-anchor="middle" class="mono">Cohn 2015 · Handler 2019</text>
+    </svg>
+    <figcaption><strong>Four experiments, twenty years.</strong> Each was
+    done in living flies with cell-type-specific genetics; together they fix
+    the place, the trigger, and the direction of the change.</figcaption>
+  </figure>
+  <p>For most brains, including ours, nobody knows the mechanism of learning
+  at this level. The fly's memory organ is the exception. Damage it and flies
+  can't learn smells.<span class="sn-ref"><label class="sn-num" for="sn3"></label><input type="checkbox" id="sn3" class="sn-toggle"><span class="sidenote">Heisenberg 2003 reviews the classical mutant and lesion evidence. Aso et&nbsp;al. 2014a showed the anatomy reads as an architecture <em>for</em> learning: a sparse KC code feeding 15 compartments, each pairing specific dopamine neurons with specific MBONs.</span></span>
+  Flash the reward cells with light instead of giving sugar, and flies learn
+  anyway.<span class="sn-ref"><label class="sn-num" for="sn4"></label><input type="checkbox" id="sn4" class="sn-toggle"><span class="sidenote">Claridge-Chang et&nbsp;al. 2009 (&quot;Writing memories with light-addressable reinforcement circuitry&quot;); Aso et&nbsp;al. 2014b mapped which dopamine neurons write reward vs. punishment. This optogenetic substitution is why our simulation can deliver reward directly at the dopamine neurons (§5).</span></span>
+  Record a memory-to-decision connection before and after training and it is
+  weaker, not stronger.<span class="sn-ref"><label class="sn-num" for="sn5"></label><input type="checkbox" id="sn5" class="sn-toggle"><span class="sidenote">Hige et&nbsp;al. 2015, by patch-clamp: pairing an odor with dopamine-neuron activity depresses that odor's KC→MBON synapses in the matching compartment.</span></span>
+  And dopamine, released by the reward cells onto exactly those connections,
+  is the trigger.<span class="sn-ref"><label class="sn-num" for="sn6"></label><input type="checkbox" id="sn6" class="sn-toggle"><span class="sidenote">Cohn, Morantte &amp; Ruta 2015: dopamine release is compartmentalized and state-dependent. Handler et&nbsp;al. 2019: the sign and timing of the plasticity follow from two dopamine receptors with different kinetics. Modi, Shuai &amp; Turner 2020 review the whole story; Bennett et&nbsp;al. 2021 is one of several computational models built on this rule.</span></span></p>
 
   <h2>3 · The map</h2>
-  <p>In 2024, a large team finished tracing an entire fruit-fly brain from
-  electron-microscope images: every one of its roughly 140,000 neurons and
-  50 million connections.<span class="sn-ref"><label class="sn-num"
-  for="sn7"></label><input type="checkbox" id="sn7" class="sn-toggle"><span
-  class="sidenote">FlyWire (Dorkenwald et&nbsp;al. 2024): 139,255
-  neurons and ~50M synapses from one adult female, proofread by a
-  community. For every pair of neurons it gives the synapse count. Schlegel
-  et&nbsp;al. 2024 add a cell class and type for every neuron — that is
-  how we know which cells are sensor, memory, decision, or reward cells.
-  The groups in the diagram are selected by those published labels, not
-  by us.</span></span> A second team turned that map into a simulation:
-  every neuron becomes a simple "fill up, then fire" unit, and each
-  connection is as strong as its number of synapses.<span
-  class="sn-ref"><label class="sn-num" for="sn8"></label><input
-  type="checkbox" id="sn8" class="sn-toggle"><span class="sidenote">Shiu
-  et&nbsp;al. 2024: leaky integrate-and-fire neurons with published
-  constants we did not change — rest/reset −52&nbsp;mV, threshold
-  −45&nbsp;mV, membrane time constant 20&nbsp;ms, synaptic decay
-  5&nbsp;ms, refractory 2.2&nbsp;ms, delay 1.8&nbsp;ms; each synapse
-  contributes 0.275&nbsp;mV, with sign from the predicted
-  neurotransmitter. The model reproduces known responses (sugar →
-  proboscis extension) with no fitting.</span></span> That simulation is
-  what runs in our demo.</p>
-  <p>Here is the catch. A map shows where the roads go, not how traffic
-  changes them. The wiring diagram contains no rule for how connections
-  strengthen or weaken — that machinery is invisible to the microscope.
-  So <em>any</em> simulation built from a map has to have its learning
-  rule added by hand. The honest question is not "did you add a rule?"
-  but "is it the right rule, in the right place?"<span
-  class="sn-ref"><label class="sn-num" for="sn9"></label><input
-  type="checkbox" id="sn9" class="sn-toggle"><span class="sidenote">Also
-  absent from the map: receptor identities, neuromodulator release, gap
-  junctions, and short-term synaptic dynamics. For the learning demo we
-  cut the map to the olfactory pathway plus mushroom body — 8,991 neurons,
-  792k synapses. Doing so surfaced a finding: the published whole-brain
-  model is bistable, and almost any central input tips it into a permanent
-  ~8,400-neuron storm. Four structural edits (each biologically argued,
-  none a parameter fit) remove the storm while leaving odor coding intact;
-  they are listed in the appendix and audited in
-  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/notes.md">notes.md</a>.</span></span></p>
+  <figure class="wide">
+    <svg class="schematic" viewBox="0 0 860 270" role="img" aria-label="Pipeline from electron-microscope slices to a wiring map to cell-type labels to a simulation; a separate band lists what the map does not contain, chiefly the learning rule, which is added by hand.">
+      <defs>
+        <marker id="m-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker>
+        <marker id="m-arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--eye)"/></marker>
+      </defs>
+      <rect x="16" y="30" width="176" height="96" rx="3" class="box"/>
+      <text x="104" y="54" text-anchor="middle" class="lbl">microscope</text>
+      <text x="104" y="76" text-anchor="middle" class="sm">one fly brain, sliced into</text>
+      <text x="104" y="92" text-anchor="middle" class="sm">thousands of layers and</text>
+      <text x="104" y="108" text-anchor="middle" class="sm">imaged at nanometre scale</text>
+      <line x1="192" y1="78" x2="218" y2="78" class="wire" marker-end="url(#m-arr)"/>
+      <rect x="222" y="30" width="196" height="96" rx="3" class="box"/>
+      <text x="320" y="54" text-anchor="middle" class="lbl">wiring map</text>
+      <text x="320" y="76" text-anchor="middle" class="sm">139,255 neurons traced,</text>
+      <text x="320" y="92" text-anchor="middle" class="sm">~50 million connections,</text>
+      <text x="320" y="108" text-anchor="middle" class="sm">each with a synapse count</text>
+      <text x="320" y="142" text-anchor="middle" class="mono">FlyWire · Dorkenwald 2024</text>
+      <line x1="418" y1="78" x2="444" y2="78" class="wire" marker-end="url(#m-arr)"/>
+      <rect x="448" y="30" width="176" height="96" rx="3" class="box"/>
+      <text x="536" y="54" text-anchor="middle" class="lbl">labels</text>
+      <text x="536" y="76" text-anchor="middle" class="sm">every neuron named:</text>
+      <text x="536" y="92" text-anchor="middle" class="sm">sensor, memory, decision,</text>
+      <text x="536" y="108" text-anchor="middle" class="sm">reward cell …</text>
+      <text x="536" y="142" text-anchor="middle" class="mono">Schlegel 2024</text>
+      <line x1="624" y1="78" x2="650" y2="78" class="wire" marker-end="url(#m-arr)"/>
+      <rect x="654" y="30" width="190" height="96" rx="3" class="box hot"/>
+      <text x="749" y="54" text-anchor="middle" class="lbl">simulation</text>
+      <text x="749" y="76" text-anchor="middle" class="sm">each neuron: fill up, fire, reset</text>
+      <text x="749" y="92" text-anchor="middle" class="sm">each connection: as strong</text>
+      <text x="749" y="108" text-anchor="middle" class="sm">as its synapse count</text>
+      <text x="749" y="142" text-anchor="middle" class="mono">Shiu 2024</text>
+      <rect x="16" y="172" width="608" height="74" rx="3" class="box dopa"/>
+      <text x="36" y="196" class="lbl" style="fill: var(--eye);">not in the map</text>
+      <text x="36" y="216" class="sm">how connections change with experience (the learning rule) ·</text>
+      <text x="36" y="232" class="sm">receptor types · dopamine release · gap junctions</text>
+      <path d="M 624 209 L 749 209 L 749 130" class="dopa" fill="none" marker-end="url(#m-arrD)"/>
+      <text x="686" y="200" text-anchor="middle" class="sm" style="fill: var(--eye);">added by hand</text>
+    </svg>
+    <figcaption><strong>From microscope to simulation.</strong> The map
+    records where every connection goes and how many synapses it has.
+    It records nothing about how connections change.</figcaption>
+  </figure>
+  <p>In 2024 one team traced every neuron and connection in a fly brain
+  from microscope images,<span class="sn-ref"><label class="sn-num" for="sn7"></label><input type="checkbox" id="sn7" class="sn-toggle"><span class="sidenote">FlyWire (Dorkenwald et&nbsp;al. 2024): 139,255 neurons and ~50M synapses from one adult female, community-proofread, with a synapse count for every connected pair. Schlegel et&nbsp;al. 2024 add a class and type for every neuron — that is how we know which cells are sensor, memory, decision, or reward cells; the groups in the diagrams are selected by those published labels, not by us.</span></span>
+  and another turned the map into a simulation: each neuron a simple
+  fill-up-and-fire unit, each connection as strong as its synapse
+  count.<span class="sn-ref"><label class="sn-num" for="sn8"></label><input type="checkbox" id="sn8" class="sn-toggle"><span class="sidenote">Shiu et&nbsp;al. 2024: leaky integrate-and-fire neurons with published constants we did not change — rest/reset −52&nbsp;mV, threshold −45&nbsp;mV, membrane time constant 20&nbsp;ms, synaptic decay 5&nbsp;ms, refractory 2.2&nbsp;ms, delay 1.8&nbsp;ms; each synapse contributes 0.275&nbsp;mV, signed by the predicted neurotransmitter. The model reproduces known responses (sugar → proboscis extension) with no fitting.</span></span>
+  A map shows where the roads go, not how traffic reshapes them: it contains
+  no learning rule. Any such rule is added by hand, so the honest question is
+  whether it is the right rule in the right place.<span class="sn-ref"><label class="sn-num" for="sn9"></label><input type="checkbox" id="sn9" class="sn-toggle"><span class="sidenote">Also absent: receptor identities, neuromodulator release, gap junctions, short-term synaptic dynamics. For this demo we cut the map to the olfactory pathway plus mushroom body — 8,991 neurons, 792k synapses — which surfaced a finding: the published whole-brain model is bistable, and almost any central input tips it into a permanent ~8,400-neuron storm. Four structural edits (each biologically argued, none a parameter fit) remove it while leaving odor coding intact; listed in the appendix, audited in <a href='https://github.com/dtch1997/fly-api/blob/main/experiments/learning/notes.md'>notes.md</a>.</span></span></p>
 
   <h2>4 · The rule</h2>
-  <p>The model's memory is a list of about 62,000 numbers: the strength
-  of every connection from a memory cell to a decision cell. Nothing else
-  in the model remembers anything from one moment to the next.<span
-  class="sn-ref"><label class="sn-num" for="sn10"></label><input
-  type="checkbox" id="sn10" class="sn-toggle"><span class="sidenote">62,261
-  KC→MBON connections (recomputed from the subnet's cell lists and the
-  FlyWire connectivity table). Their weights start at the connectome
-  value. Membrane voltages and synaptic conductances are reset between
-  episodes; only this weight vector carries over.</span></span></p>
-  <p>The rule that changes those numbers fits in one sentence:</p>
-  <div class="keyidea">Whenever the reward cells fire, every connection
-  coming <em>out of</em> a memory cell that was active at the same time
-  gets cut in half.</div>
-  <p>That is the whole algorithm.<span class="sn-ref"><label
-  class="sn-num" for="sn11"></label><input type="checkbox" id="sn11"
-  class="sn-toggle"><span class="sidenote">Verbatim from
-  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/learning_driver_mb.py"><code>learning_driver_mb.py</code></a>:
-  <code class="snblock">kc_active = KCs with ≥1 spike this episode
+  <figure class="wide">
+    <svg class="schematic" viewBox="0 0 860 300" role="img" aria-label="Three panels. Before: four memory cells connect to two decision cells with equal strength. During: smell A activates two memory cells while the reward cells fire, marking those two cells' connections. After: the connections from smell A's cells are half as strong; the others are unchanged.">
+      <defs>
+        <marker id="r-arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--eye)"/></marker>
+      </defs>
+      <!-- panel: before -->
+      <text x="150" y="30" text-anchor="middle" class="lbl">before</text>
+      <text x="60" y="58" text-anchor="middle" class="sm">memory cells</text>
+      <text x="240" y="58" text-anchor="middle" class="sm">decision cells</text>
+      <circle cx="60" cy="90" r="10" class="box"/><circle cx="60" cy="130" r="10" class="box"/>
+      <circle cx="60" cy="170" r="10" class="box"/><circle cx="60" cy="210" r="10" class="box"/>
+      <rect x="220" y="100" width="40" height="28" rx="3" class="box"/><rect x="220" y="172" width="40" height="28" rx="3" class="box"/>
+      <g stroke="var(--ink)" stroke-width="3">
+        <line x1="70" y1="90" x2="220" y2="114"/><line x1="70" y1="130" x2="220" y2="114"/>
+        <line x1="70" y1="170" x2="220" y2="186"/><line x1="70" y1="210" x2="220" y2="186"/>
+      </g>
+      <text x="150" y="262" text-anchor="middle" class="sm">all knobs at full strength</text>
+      <!-- panel: during -->
+      <text x="430" y="30" text-anchor="middle" class="lbl">smell A + reward</text>
+      <text x="340" y="58" text-anchor="middle" class="sm">A's crew fires</text>
+      <circle cx="340" cy="90" r="10" class="box" style="fill: var(--amber);"/><circle cx="340" cy="130" r="10" class="box" style="fill: var(--amber);"/>
+      <circle cx="340" cy="170" r="10" class="box"/><circle cx="340" cy="210" r="10" class="box"/>
+      <rect x="500" y="100" width="40" height="28" rx="3" class="box"/><rect x="500" y="172" width="40" height="28" rx="3" class="box"/>
+      <g stroke="var(--amber)" stroke-width="3">
+        <line x1="350" y1="90" x2="500" y2="114"/><line x1="350" y1="130" x2="500" y2="114"/>
+      </g>
+      <g stroke="var(--ink)" stroke-width="3">
+        <line x1="350" y1="170" x2="500" y2="186"/><line x1="350" y1="210" x2="500" y2="186"/>
+      </g>
+      <rect x="392" y="228" width="80" height="30" rx="3" class="box dopa"/>
+      <text x="432" y="247" text-anchor="middle" class="sm">reward cells</text>
+      <path d="M 432 228 L 432 118" class="dopa" fill="none" marker-end="url(#r-arrD)"/>
+      <text x="446" y="160" class="sm" style="fill: var(--eye);">"cut these</text>
+      <text x="446" y="174" class="sm" style="fill: var(--eye);">in half"</text>
+      <text x="430" y="280" text-anchor="middle" class="sm">only the active cells' knobs are touched</text>
+      <!-- panel: after -->
+      <text x="710" y="30" text-anchor="middle" class="lbl">after</text>
+      <circle cx="620" cy="90" r="10" class="box"/><circle cx="620" cy="130" r="10" class="box"/>
+      <circle cx="620" cy="170" r="10" class="box"/><circle cx="620" cy="210" r="10" class="box"/>
+      <rect x="780" y="100" width="40" height="28" rx="3" class="box"/><rect x="780" y="172" width="40" height="28" rx="3" class="box"/>
+      <g stroke="var(--amber)" stroke-width="1.2">
+        <line x1="630" y1="90" x2="780" y2="114"/><line x1="630" y1="130" x2="780" y2="114"/>
+      </g>
+      <g stroke="var(--ink)" stroke-width="3">
+        <line x1="630" y1="170" x2="780" y2="186"/><line x1="630" y1="210" x2="780" y2="186"/>
+      </g>
+      <text x="710" y="262" text-anchor="middle" class="sm">A's grip on the decision is halved;</text>
+      <text x="710" y="278" text-anchor="middle" class="sm">every other smell is untouched</text>
+    </svg>
+    <figcaption><strong>One learning step.</strong> Smell A's crew of memory
+    cells fires while the reward cells fire; the connections leaving that
+    crew are halved. Everything else is left alone.</figcaption>
+  </figure>
+  <p>The model's memory is a list of about 62,000 numbers — the strength of
+  every memory-to-decision connection — and nothing else carries over from
+  one moment to the next.<span class="sn-ref"><label class="sn-num" for="sn10"></label><input type="checkbox" id="sn10" class="sn-toggle"><span class="sidenote">62,261 KC→MBON connections (recomputed from the subnet's cell lists and the FlyWire connectivity table). Weights start at the connectome value; membrane voltages and synaptic conductances are reset between episodes, so this vector is the only persistent state.</span></span></p>
+  <div class="keyidea">Whenever the reward cells fire, every connection coming
+  <em>out of</em> a memory cell that was active at the same time gets cut in
+  half.</div>
+  <p>That is the whole algorithm.<span class="sn-ref"><label class="sn-num" for="sn11"></label><input type="checkbox" id="sn11" class="sn-toggle"><span class="sidenote">Verbatim from <a href='https://github.com/dtch1997/fly-api/blob/main/experiments/learning/learning_driver_mb.py'><code>learning_driver_mb.py</code></a>:<code class='snblock'>kc_active = KCs with ≥1 spike this episode
 pam_hz    = mean PAM DAN rate this episode
 if us and pam_hz >= 1.0:              # dopamine gate
     hot = synapses whose presynaptic
           KC is in kc_active
-    w[hot] *= (1 - eta)               # eta = 0.5</code>
-  Dopamine-gated long-term depression at KC→MBON, applied once per
-  episode. No objective function, no gradient, no hidden
-  state.</span></span> No training loop, no error signal, no clever
-  optimization — just "cut these in half."</p>
-  <p><strong>Which parts are real, and which are simplified?</strong> The
-  three things that make this the fly's rule rather than a generic one
-  all match what §2 established: the <em>place</em> (memory-to-decision
-  connections), the <em>trigger</em> (reward cells firing at the same time
-  as the smell), and the <em>direction</em> (weaker). Everything about the
-  <em>fine print</em> is our simplification. In a real fly the change is
-  gradual and depends on precise timing; we apply it in one step at the
-  end of each half-second.<span class="sn-ref"><label class="sn-num"
-  for="sn12"></label><input type="checkbox" id="sn12" class="sn-toggle"><span
-  class="sidenote">Real plasticity is continuous and receptor-mediated,
-  with sign and size depending on odor–dopamine timing at sub-second
-  resolution (Handler 2019). Our episodic "same episode = coincident"
-  abstraction cannot reproduce forward-vs-backward pairing
-  effects.</span></span> A real fly's reward cells are organized into
-  compartments that write different lessons to different decision cells;
-  we use one reward signal for all of them.<span class="sn-ref"><label
-  class="sn-num" for="sn13"></label><input type="checkbox" id="sn13"
-  class="sn-toggle"><span class="sidenote">Biology: 15 compartments, each
-  DAN type writing to its own MBON zone, appetitive and aversive traces
-  in parallel (Aso 2014, Cohn 2015). Model: one scalar gate (mean PAM
-  rate ≥ 1&nbsp;Hz) and one uniform η. Also: real DANs make fast synapses
-  too; we zeroed those for stability, so dopamine acts only through the
-  scripted rule.</span></span> And real memories fade and can be
-  unlearned; ours only ever get stronger.<span class="sn-ref"><label
-  class="sn-num" for="sn14"></label><input type="checkbox" id="sn14"
-  class="sn-toggle"><span class="sidenote">Depression only, permanent. No
-  recovery, extinction, or forgetting. The full biology-vs-model ledger
-  is in the appendix.</span></span></p>
+    w[hot] *= (1 - eta)               # eta = 0.5</code>Dopamine-gated long-term depression at KC→MBON, once per episode. No objective, no gradient, no hidden state.</span></span>
+  Its place, trigger, and direction are the fly's (§2). The fine print is ours:
+  one step at the end of each half-second instead of a gradual, timing-sensitive
+  change;<span class="sn-ref"><label class="sn-num" for="sn12"></label><input type="checkbox" id="sn12" class="sn-toggle"><span class="sidenote">Real plasticity is continuous and receptor-mediated, with sign and size depending on odor–dopamine timing at sub-second resolution (Handler 2019). Our &quot;same episode = coincident&quot; abstraction cannot reproduce forward-vs-backward pairing effects.</span></span>
+  one reward signal for all decision cells instead of many;<span class="sn-ref"><label class="sn-num" for="sn13"></label><input type="checkbox" id="sn13" class="sn-toggle"><span class="sidenote">Biology: 15 compartments, each dopamine-neuron type writing to its own MBON zone, appetitive and aversive traces in parallel (Aso 2014, Cohn 2015). Model: one scalar gate (mean PAM rate ≥ 1&nbsp;Hz) and one uniform η. Real dopamine neurons also make fast synapses; we zeroed those for stability, so dopamine acts only through the scripted rule.</span></span>
+  and memories that never fade.<span class="sn-ref"><label class="sn-num" for="sn14"></label><input type="checkbox" id="sn14" class="sn-toggle"><span class="sidenote">Depression only, permanent: no recovery, extinction, or forgetting. The full biology-vs-model ledger is in the appendix.</span></span></p>
 
   <h2>5 · Teaching the fly</h2>
-  <p>You probably know Pavlov's dog: ring a bell before every meal, and
-  soon the dog drools at the bell alone. Flies learn the same way with
-  smells. Give them smell A together with sugar, smell B with nothing,
-  and later they walk toward A.<span class="sn-ref"><label class="sn-num"
-  for="sn15"></label><input type="checkbox" id="sn15" class="sn-toggle"><span
-  class="sidenote">In conditioning jargon, the smell is the conditioned
-  stimulus (CS) and the sugar the unconditioned stimulus (US). The classic
-  fly assay is Tully &amp; Quinn 1985: train a group with odor A + sugar
-  or shock and odor B alone, then let them choose between A and B in a
-  T-maze; the fraction choosing A is the memory score. B is the control —
-  it experiences everything except the smell–reward coincidence.</span></span>
-  Our simulation does the same thing, one half-second episode at a
-  time:</p>
-
   <figure class="wide">
     <svg class="schematic" viewBox="0 0 860 250" role="img" aria-label="Four-step loop: present the smell for half a second; note which memory cells fired; check whether the reward cells fired; if so, halve those memory cells' connections to decision cells. A return arrow notes that everything else resets and only the connection strengths persist.">
       <defs>
@@ -473,65 +464,27 @@ if us and pam_hz >= 1.0:              # dopamine gate
       <path d="M 746 144 L 746 196 L 111 196 L 111 148" class="wire" fill="none" marker-end="url(#arr2)"/>
       <text x="428" y="188" text-anchor="middle" class="sm">next episode: everything resets except the connection strengths — they are the memory</text>
     </svg>
-    <figcaption><strong>One training episode.</strong> The knob-turning
-    happens between episodes, as a bookkeeping step, rather than inside
-    the simulated brain — the main way our version is simpler than the
-    real thing.</figcaption>
+    <figcaption><strong>One training episode</strong>, repeated five times
+    for smell A with reward, interleaved with smell B without. The knob-turning
+    is a bookkeeping step between episodes, not part of the simulated
+    brain.</figcaption>
   </figure>
-
-  <p>A "smell" is a particular set of sensor cells switched on for half a
-  second. The "reward" is the reward cells switched on during that same
-  half-second — the light-flash version of sugar from §2, not sugar
-  itself.<span class="sn-ref"><label class="sn-num" for="sn16"></label><input
-  type="checkbox" id="sn16" class="sn-toggle"><span class="sidenote">CS: a
-  disjoint set of six ORN receptor classes, count-balanced, driven at
-  500&nbsp;Hz for 0.5&nbsp;s. US: the 307 PAM dopamine neurons driven at
-  60&nbsp;Hz. We inject the US at the DANs because the model's own
-  sugar→PAM route is silent in this regime (measured: PAMs at 0&nbsp;Hz
-  under sugar drive) — a documented limitation, but one with a real
-  experimental precedent.</span></span> We present smell A with reward
-  five times, with smell B and no reward in between as the control. Then
-  we test: how strongly do the decision cells respond to each smell
-  now?</p>
-  <p>The result: the response to smell A drops by about 99%, while smell
-  B — whose memory cells were never active during a reward — is
-  untouched.<span class="sn-ref"><label class="sn-num" for="sn17"></label><input
-  type="checkbox" id="sn17" class="sn-toggle"><span class="sidenote">Five
-  pairings at η&nbsp;=&nbsp;0.5 compound to ~97% depression per trained
-  synapse. A's MBON response falls from 3,700–4,300 spikes to 0–57 across
-  three seeds; B stays at 3,400–4,300. The MBON-spike readout uses a ×20
-  efficacy correction on KC→MBON synapses (spiking MBON responses in the
-  stable regime are dominated by a few direct PN→MBON connections); the
-  synaptic-trace readout needs no correction and shows the same picture.
-  Details and sensitivity in the
-  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/report.md">report</a>.</span></span>
-  We can't watch this fly walk to a T-maze arm here — the
-  <a href="index.html">navigation demo</a> does that — so the decision
-  cells' response stands in for the behavior.</p>
-  <p>One more thing, and it is the part we find most satisfying. Smells
-  that partly resemble A also get partly suppressed — the more similar,
-  the more suppressed. Nothing in our rule says that should happen. It
-  happens because similar smells share some of the same memory cells, so
-  they share some of the same turned-down knobs. That is the real wiring
-  doing the work, not us.<span class="sn-ref"><label class="sn-num"
-  for="sn18"></label><input type="checkbox" id="sn18" class="sn-toggle"><span
-  class="sidenote">Probe odors sharing 67/50/33/0% of A's receptor
-  classes inherit graded suppression (~60–75% at 67% overlap, falling to
-  0 at disjoint). The synaptic-trace version of this gradient needs no
-  tuned parameters at all. This is the qualitative signature of
-  generalization gradients in real flies.</span></span></p>
+  <p>Pavlov's dog drooled at the bell; a fly walks toward a smell that came
+  with sugar.<span class="sn-ref"><label class="sn-num" for="sn15"></label><input type="checkbox" id="sn15" class="sn-toggle"><span class="sidenote">The smell is the conditioned stimulus (CS), the sugar the unconditioned stimulus (US). The classic assay is Tully &amp; Quinn 1985: train with odor A + sugar or shock and odor B alone, then let flies choose between A and B in a T-maze; the fraction choosing A is the memory score. B is the control — it experiences everything except the smell–reward coincidence.</span></span>
+  We present smell A with the reward cells switched on, five times, with
+  smell B and no reward in between.<span class="sn-ref"><label class="sn-num" for="sn16"></label><input type="checkbox" id="sn16" class="sn-toggle"><span class="sidenote">CS: a disjoint set of six ORN receptor classes, count-balanced, driven at 500&nbsp;Hz for 0.5&nbsp;s. US: the 307 PAM dopamine neurons at 60&nbsp;Hz. We inject the US at the dopamine neurons because the model's own sugar→PAM route is silent in this regime (measured: PAMs at 0&nbsp;Hz under sugar drive) — a documented limitation with a real experimental precedent (§2, experiment 2).</span></span>
+  Afterwards the decision cells' response to A has dropped by about 99%; B is
+  untouched.<span class="sn-ref"><label class="sn-num" for="sn17"></label><input type="checkbox" id="sn17" class="sn-toggle"><span class="sidenote">Five pairings at η&nbsp;=&nbsp;0.5 compound to ~97% depression per trained synapse. A's MBON response falls from 3,700–4,300 spikes to 0–57 across three seeds; B stays at 3,400–4,300. The spike readout uses a ×20 efficacy correction on KC→MBON synapses; the synaptic-trace readout needs none and shows the same picture. We cannot watch this fly walk to a T-maze arm here (the navigation demo does that), so the decision cells' response stands in for behavior. Sensitivity in the <a href='https://github.com/dtch1997/fly-api/blob/main/experiments/learning/report.md'>report</a>.</span></span>
+  Smells that partly resemble A are partly suppressed — that is the wiring's
+  doing, not the rule's.<span class="sn-ref"><label class="sn-num" for="sn18"></label><input type="checkbox" id="sn18" class="sn-toggle"><span class="sidenote">Probe odors sharing 67/50/33/0% of A's receptor classes inherit graded suppression (~60–75% at 67% overlap, falling to 0 at disjoint), because they share memory cells and therefore share the turned-down knobs. The synaptic-trace version of this gradient needs no tuned parameters at all. It is the qualitative signature of generalization gradients in real flies.</span></span></p>
 
   <div class="note wide"><strong>So: realistic, or a hack?</strong> Both,
-  and it is worth being precise about which is which. The <em>place</em>,
-  the <em>trigger</em>, and the <em>direction</em> of the change are the
-  fly's, established by the experiments in §2. The way similar smells
-  share the memory comes from the real wiring in §3. What is ours is the
-  fine print: one big step instead of a gradual change, one reward signal
-  instead of many, memories that never fade. We chose the simplest rule
-  the evidence supports and kept a full list of the simplifications. The
-  test of "realistic" is whether the result depends on our choices; the
-  one place it partly does — how we read out the decision cells — is
-  flagged in the notes, and the similarity result survives with nothing
+  cleanly separated. The place, trigger, and direction of the change are the
+  fly's (§2); the way similar smells share a memory comes from the real wiring
+  (§3). Ours is the fine print: one big step, one reward signal, memories that
+  never fade. The test of "realistic" is whether the result depends on our
+  choices; the one place it partly does — how we read out the decision cells —
+  is flagged in the notes, and the similarity result survives with nothing
   tuned at all.</div>
 
   <h2>Appendix · the assumptions ledger</h2>
