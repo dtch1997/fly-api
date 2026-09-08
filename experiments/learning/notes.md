@@ -58,3 +58,20 @@ Next: short-term synaptic depression (Tsodyks-Markram, event-driven, all
 synapses) — punishes sustained high-rate transmission (what the storm is)
 while sparing transient volleys (what the sensory responses are).
 model_ext.py now builds the net with either mechanism.
+
+## Dead ends logged (2026-09-08)
+
+- **STD**: even U=0.1 collapses sugar->MN9 (70->4Hz) — the feeding chain
+  itself relies on sustained high-rate relay. Fails regression.
+- **E/I gain** (partial, run was stopped): i_gain=2 leaves storm alive AND
+  breaks MN9. Axis unpromising.
+- **Pulse-mode**: ignition latency ~0 — 6.3k neurons active in the first
+  50ms bin, saturated by 100ms. No stable transient window under PN drive.
+
+## Reframe: inject the CS at the periphery (ORNs), not at PNs
+
+Sugar GRN drive (peripheral) is stable (403 neurons). Driving PNs directly
+bypasses the antennal lobe's local-interneuron gain control — plausibly
+why it ignites. Odors ARE ORN-class patterns; probe_orn.py drives 4
+disjoint ORN glomerulus classes per odor at 100Hz and checks stability +
+KC sparseness + A-vs-B code overlap.
