@@ -100,7 +100,7 @@ python learning_driver_mb.py --model-dir <Drosophila_brain_model clone> \
 python figures_mb.py
 ```
 
-Seeds 0/1/2 + the G=1 arm are committed under `runs/` (episodes.jsonl).
+Seeds 0/1/2 + the G=1 arm regenerate deterministically from the commands above (runs/ is gitignored; an earlier claim that episodes.jsonl were committed was wrong).
 
 ## Next
 

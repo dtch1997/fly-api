@@ -43,6 +43,8 @@ class Brain:
         from model import default_params
         from model_ext import build_subnet
         from brian2 import PoissonGroup, Synapses, Network, Hz, ms, mV, volt
+        import brian2
+        brian2.seed(seed)
         self.br = dict(Hz=Hz, ms=ms, mV=mV, volt=volt)
         ann = pd.read_csv(ANN, sep='\t', low_memory=False)
         cc = ann.cell_class.fillna(''); sc = ann.super_class.fillna('')
@@ -178,8 +180,18 @@ def rollout(brain, which, out, args):
         vR = brain.valence(conc(ant_R, SRC_A), conc(ant_R, SRC_B))
         tot = vL + vR
         delta = args.steer_sign * args.steer_gain * (vL - vR) / max(tot, 200.0)
-        delta = float(np.clip(delta, -0.45, 0.45))
-        if tot < 80:  # signal lost (deep in the learned-suppression zone): slow down
+        delta = float(np.clip(delta, -0.32, 0.32))
+        c_head = conc(pos + 1.5 * head, SRC_A) + conc(pos + 1.5 * head, SRC_B)
+        if tot < 80 and c_head > 0.45:
+            # valence silenced BY the learned depression while odor is strong:
+            # this is the learned source — stop and feed
+            print(f'[{which}] valence silenced in strong odor -> arrived, feeding', flush=True)
+            traj.append(pos.tolist())
+            log.append({'d': d, 'pos': pos.tolist(), 'vL': vL, 'vR': vR,
+                        'delta': 0.0, 'dA': round(float(np.linalg.norm(pos - SRC_A)), 2),
+                        'dB': round(float(np.linalg.norm(pos - SRC_B)), 2), 'arrived': True})
+            break
+        if tot < 80:  # signal lost far from odor: slow down
             action = np.array([0.55, 0.55])
         else:
             action = np.array([1.0 + delta, 1.0 - delta])
