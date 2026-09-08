@@ -5,6 +5,11 @@
 A fruit fly's complete wiring diagram — 139,255 neurons, 50M+ synapses
 ([FlyWire](https://flywire.ai)) — running as a working nervous system.
 
+> **Being upfront:** the science and most of the code here existed already
+> (FlyWire, Shiu et al., flygym) — our part so far is reproduction,
+> integration, two upstream bug fixes, and packaging. The full ledger:
+> [docs/prior-art.md](docs/prior-art.md).
+
 <p align="center">
   <img src="media/b2_taxis.gif" width="480" alt="Simulated fly chasing a moving sphere; hexagonal insets show each eye's ommatidia view">
   <br>
