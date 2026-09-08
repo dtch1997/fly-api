@@ -58,6 +58,8 @@ No policy network, no path planner. The loop, once per decision step
 ```
  antenna positions ──► local odor concentrations (cA, cB)   [two Gaussian
  (from body pose)      at the left and right antenna         odor fields]
+                       — the fly is effectively blind here: the spheres in
+                       the video are markers for the viewer, not stimuli —
         │
         ▼
  one 150 ms "sniff" per antenna: the mixture drives odor A's and
