@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the Fly Learns · fly-api</title>
+<meta name="description" content="A plain-language explainer of how the fruit-fly connectome demo learns — the memory organ, how we know, the map, the rule, and the conditioning experiment — with technical sidenotes.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #FAF6EF; --card: #F2EBDD; --ink: #221B12; --ink2: #6B5F4E;
+    --accent: #8F6110; --amber: #B47B12; --eye: #A93B2E; --ok: #4A7A3A;
+    --rule: #DFD3BC; --mono-bg: #EFE7D5;
+    --col: 620px; --gutter: 24px; --margin-col: 340px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1B1510; --card: #261F16; --ink: #EFE6D6; --ink2: #A89880;
+      --accent: #D9A83C; --amber: #D9A83C; --eye: #C96A5B; --ok: #7FA86B;
+      --rule: #3A3226; --mono-bg: #2D251A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1B1510; --card: #261F16; --ink: #EFE6D6; --ink2: #A89880;
+    --accent: #D9A83C; --amber: #D9A83C; --eye: #C96A5B; --ok: #7FA86B;
+    --rule: #3A3226; --mono-bg: #2D251A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 17px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main {
+    max-width: calc(var(--col) + 2 * var(--gutter));
+    margin: 0 auto; padding: 52px var(--gutter) 80px;
+    counter-reset: sidenote;
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 12px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+    margin: 0 0 10px; font-weight: 500;
+  }
+  h1 {
+    font-family: "Newsreader", Georgia, serif; font-weight: 500;
+    font-size: clamp(36px, 6vw, 52px); line-height: 1.08;
+    margin: 0 0 12px; text-wrap: balance;
+  }
+  .sub { color: var(--ink2); margin: 0 0 28px; font-size: 18.5px; }
+  h2 {
+    font-family: "Newsreader", Georgia, serif; font-weight: 600;
+    font-size: 25px; margin: 52px 0 12px; text-wrap: balance;
+  }
+  h3 {
+    font-family: "Newsreader", Georgia, serif; font-weight: 600;
+    font-size: 19px; margin: 32px 0 8px;
+  }
+  p, ul, ol { margin: 0 0 16px; }
+  figure { margin: 22px 0; }
+  figcaption { font-size: 13.5px; color: var(--ink2); margin-top: 8px; line-height: 1.55; }
+  code, .mono {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 0.86em;
+    background: var(--mono-bg); padding: 1px 5px; border-radius: 3px;
+  }
+  pre.codeblock {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 12px;
+    line-height: 1.55; background: var(--mono-bg); border: 1px solid var(--rule);
+    padding: 12px 14px; overflow-x: auto; max-width: 100%; margin: 10px 0 0;
+  }
+  pre.codeblock code { background: none; padding: 0; }
+  code.snblock { display: block; white-space: pre; overflow-x: auto; font-size: 11.5px; line-height: 1.5;
+    background: var(--mono-bg); border: 1px solid var(--rule); padding: 8px 10px; margin: 8px 0; border-radius: 3px; }
+  .note {
+    border-left: 3px solid var(--eye); background: var(--card);
+    padding: 12px 16px; margin: 24px 0;
+  }
+  .qa {
+    border-left: 3px solid var(--amber); background: var(--card);
+    padding: 12px 16px; margin: 20px 0; font-style: italic; color: var(--ink2);
+  }
+  .keyidea {
+    background: var(--card); border: 1px solid var(--rule); border-top: 2px solid var(--amber);
+    padding: 14px 18px; margin: 22px 0; font-size: 17.5px;
+  }
+  .keyidea strong { font-family: "Newsreader", Georgia, serif; font-size: 19px; }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; margin: 18px 0; }
+  th {
+    text-align: left; font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink2); font-weight: 500; padding: 6px 14px 6px 0;
+    border-bottom: 1px solid var(--ink);
+  }
+  td { padding: 8px 14px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; font-size: 14px; line-height: 1.5; }
+  td:first-child { font-weight: 600; min-width: 110px; }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  a:focus-visible, .sn-num:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  li { margin: 6px 0; }
+  .schematic { width: 100%; height: auto; display: block; background: var(--card); border: 1px solid var(--rule); }
+  .schematic text { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: var(--ink); }
+  .schematic .lbl  { font-size: 13px; font-weight: 600; }
+  .schematic .sm   { font-size: 11px; fill: var(--ink2); }
+  .schematic .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11px; background: none; padding: 0; }
+  .schematic .box  { fill: var(--bg); stroke: var(--ink2); stroke-width: 1.2; }
+  .schematic .hot  { stroke: var(--amber); stroke-width: 2; }
+  .schematic .dopa { stroke: var(--eye); stroke-width: 1.6; }
+  .schematic .wire { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+  .refs li { margin: 9px 0; font-size: 14px; }
+  .hexrow { display: flex; gap: 6px; margin: 40px 0 0; }
+  .hex {
+    width: 15px; height: 17px; background: var(--rule);
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  }
+  .hex.a { background: var(--amber); } .hex.e { background: var(--eye); }
+
+  /* ---- sidenotes (Tufte-style; margin on wide screens, tap-to-open inline on narrow) ---- */
+  .sn-ref { counter-increment: sidenote; }
+  .sn-num {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 0.7em;
+    color: var(--accent); vertical-align: super; line-height: 0; cursor: pointer;
+    padding: 0 2px; font-weight: 500;
+  }
+  .sn-num::after { content: counter(sidenote); }
+  .sn-toggle { display: none; }
+  .sidenote {
+    display: none; font-size: 13.5px; line-height: 1.5; color: var(--ink2);
+    background: var(--card); border-left: 2px solid var(--amber);
+    padding: 8px 12px; margin: 10px 0;
+  }
+  .sidenote::before {
+    content: counter(sidenote) " "; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    color: var(--accent); font-weight: 500;
+  }
+  .sidenote code { font-size: 0.9em; }
+  .sn-toggle:checked ~ .sidenote { display: block; }
+  .sidehint { font-size: 13px; color: var(--ink2); margin: -14px 0 24px; }
+  @media (min-width: 1120px) {
+    main { max-width: calc(var(--col) + 2 * var(--gutter) + var(--margin-col)); padding-right: calc(var(--gutter) + var(--margin-col)); }
+    .sidenote, .sn-toggle:checked ~ .sidenote {
+      display: block; float: right; clear: right; width: calc(var(--margin-col) - 40px);
+      margin: 0 calc(-1 * var(--margin-col)) 14px 0; position: relative;
+      background: none; border-left: 2px solid var(--rule); padding: 0 0 0 12px;
+    }
+    .sn-num { cursor: default; }
+    .sidehint { display: none; }
+    figure.wide { width: calc(100% + var(--margin-col) - 24px); clear: both; }
+    .note.wide, .tablewrap.wide { width: calc(100% + var(--margin-col) - 24px); clear: both; }
+  }
+  @media (prefers-reduced-motion: no-preference) { .sidenote { transition: opacity .15s; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow"><a href="index.html">fly-api</a> · plain-language explainer</p>
+  <h1>How the Fly Learns</h1>
+  <p class="sub">The <a href="index.html">demo</a> shows a computer model of a
+  fruit fly's brain learning that one smell means a treat is coming. But
+  the model was built from a wiring diagram — a map of the brain, not the
+  brain itself. So what actually changes when it "learns"? The short
+  answer: a small set of connections gets weaker, by the same rule real
+  flies use. This page explains that in plain terms. The numbered notes
+  hold the technical detail for anyone who wants it.</p>
+  <p class="sidehint">On a phone, tap a note number to open it.</p>
+
+  <div class="qa">"How is the fly learning? What's under the hood? I
+  thought we didn't have a good idea of how biological brains learned
+  mechanically. Is it realistic, or a hack?" — a friend, on seeing the
+  demo. A fair question.</div>
+
+  <h2>1 · The fly's memory organ</h2>
+  <p>Deep in a fruit fly's head sit two small structures called
+  <em>mushroom bodies</em>, named for their shape. This is where the fly
+  stores what smells mean. Here is the circuit, drawn from the actual
+  wiring diagram of a fly brain:</p>
+
+  <figure class="wide">
+    <svg class="schematic" viewBox="0 0 860 330" role="img" aria-label="Circuit schematic: a smell drives sensor cells, then a sorting station, then memory cells with feedback inhibition keeping them sparse; memory cells connect to decision cells through the only connections that can change, highlighted; reward cells below control whether those connections change; decision cells vote approach or avoid.">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/>
+        </marker>
+        <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--amber)"/>
+        </marker>
+        <marker id="arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--eye)"/>
+        </marker>
+        <marker id="bar" viewBox="0 0 6 12" refX="4" refY="6" markerWidth="6" markerHeight="10" orient="auto">
+          <rect x="2" y="0" width="2.4" height="12" fill="var(--ink2)"/>
+        </marker>
+      </defs>
+
+      <text x="22" y="120" class="lbl">smell</text>
+      <line x1="66" y1="115" x2="88" y2="115" class="wire" marker-end="url(#arr)"/>
+
+      <rect x="92" y="82" width="118" height="66" rx="3" class="box"/>
+      <text x="151" y="104" text-anchor="middle" class="lbl">sensor cells</text>
+      <text x="151" y="121" text-anchor="middle" class="sm">2,279 in the antennae</text>
+      <text x="151" y="136" text-anchor="middle" class="sm">(ORNs)</text>
+      <line x1="210" y1="115" x2="240" y2="115" class="wire" marker-end="url(#arr)"/>
+
+      <rect x="244" y="82" width="140" height="66" rx="3" class="box"/>
+      <text x="314" y="104" text-anchor="middle" class="lbl">sorting station</text>
+      <text x="314" y="121" text-anchor="middle" class="sm">1,114 cells</text>
+      <text x="314" y="136" text-anchor="middle" class="sm">(antennal lobe)</text>
+      <line x1="384" y1="115" x2="414" y2="115" class="wire" marker-end="url(#arr)"/>
+
+      <rect x="418" y="82" width="150" height="66" rx="3" class="box"/>
+      <text x="493" y="104" text-anchor="middle" class="lbl">memory cells</text>
+      <text x="493" y="121" text-anchor="middle" class="sm">5,177 — each smell wakes</text>
+      <text x="493" y="136" text-anchor="middle" class="sm">only ~1–4% (Kenyon cells)</text>
+
+      <rect x="448" y="16" width="90" height="34" rx="3" class="box"/>
+      <text x="493" y="37" text-anchor="middle" class="sm">APL (2 cells)</text>
+      <path d="M 470 82 L 470 50" class="wire" marker-end="url(#arr)"/>
+      <path d="M 516 50 L 516 82" class="wire" marker-end="url(#bar)"/>
+      <text x="556" y="60" class="sm">a damper that keeps</text>
+      <text x="556" y="74" class="sm">most memory cells quiet</text>
+
+      <line x1="568" y1="115" x2="640" y2="115" class="wire hot" marker-end="url(#arrA)"/>
+      <text x="604" y="100" text-anchor="middle" class="sm" style="fill: var(--amber); font-weight: 600;">the only</text>
+      <text x="604" y="151" text-anchor="middle" class="sm" style="fill: var(--amber); font-weight: 600;">connections that change</text>
+
+      <rect x="644" y="82" width="112" height="66" rx="3" class="box"/>
+      <text x="700" y="104" text-anchor="middle" class="lbl">decision cells</text>
+      <text x="700" y="121" text-anchor="middle" class="sm">96 (MBONs)</text>
+      <line x1="756" y1="115" x2="786" y2="115" class="wire" marker-end="url(#arr)"/>
+      <text x="794" y="110" class="sm">approach</text>
+      <text x="794" y="126" class="sm">/ avoid</text>
+
+      <text x="284" y="262" class="lbl">something good</text>
+      <line x1="394" y1="257" x2="416" y2="257" class="wire dopa" marker-end="url(#arrD)"/>
+      <rect x="420" y="228" width="230" height="58" rx="3" class="box dopa"/>
+      <text x="535" y="250" text-anchor="middle" class="lbl">reward cells (323)</text>
+      <text x="535" y="268" text-anchor="middle" class="sm">dopamine neurons: PAM reward · PPL1 punishment</text>
+      <path d="M 604 228 L 604 132" class="wire dopa" marker-end="url(#arrD)"/>
+      <text x="616" y="196" class="sm" style="fill: var(--eye);">"change these</text>
+      <text x="616" y="211" class="sm" style="fill: var(--eye);">connections now"</text>
+    </svg>
+    <figcaption><strong>The smell-to-memory circuit</strong>, with the
+    number of cells of each kind in our model. Amber marks the one place
+    where connections are allowed to change. Red marks the cells that give
+    the order to change them.</figcaption>
+  </figure>
+
+  <p>Read it left to right. A smell lands on a couple of thousand
+  <strong>sensor cells</strong> in the antennae. A <strong>sorting
+  station</strong> tidies the signal. Then it fans out across about five
+  thousand <strong>memory cells</strong> — but a built-in damper makes
+  sure only a few dozen of them wake up for any given smell, and a
+  different few dozen for each smell.<span class="sn-ref"><label
+  class="sn-num" for="sn1"></label><input type="checkbox" id="sn1"
+  class="sn-toggle"><span class="sidenote">The memory cells are Kenyon
+  cells (KCs). Each listens to a random handful of the 685 projection
+  neurons leaving the antennal lobe and fires only when several agree;
+  the two giant APL neurons feed inhibition back so only the
+  best-matched cells win. This is <em>sparse coding</em>. In our runs
+  each odor activates 1–4% of KCs, two odors' codes overlap by about
+  1% (Jaccard 0.01), and the same odor gives the same code every time
+  (Jaccard 1.00).</span></span> Every memory cell is wired to a handful
+  of about a hundred <strong>decision cells</strong>, and the decision
+  cells vote: move toward this smell, or away from it. Finally, a group of
+  <strong>reward cells</strong> fire when something good happens to the
+  fly, like tasting sugar.<span class="sn-ref"><label class="sn-num"
+  for="sn2"></label><input type="checkbox" id="sn2" class="sn-toggle"><span
+  class="sidenote">The decision cells are mushroom-body output neurons
+  (MBONs), 96 of them in 35 types. The reward cells are dopamine neurons:
+  307 in the PAM cluster (reward) and 16 in PPL1 (punishment). All
+  counts come from the model's cell-type labels
+  (<code>experiments/learning/mb_subnet_ids.json</code>).</span></span></p>
+
+  <div class="keyidea"><strong>The key idea.</strong> Each smell has its own
+  small crew of memory cells, and each memory cell has connections to the
+  decision cells. Those connections are the knobs. Turn down the knobs on
+  one smell's crew, and that smell's grip on the decision changes —
+  without touching any other smell. Reward cells are the hand that turns
+  the knobs.</div>
+
+  <h2>2 · How do we know this is where flies learn?</h2>
+  <p>It is true that for most brains, including ours, nobody knows the
+  mechanism of learning at this level of detail. The fly mushroom body is
+  the famous exception. Fly researchers can switch specific cells on and
+  off with light and genetics, and record from single cells while the fly
+  learns. Over twenty years, that toolkit produced four findings:</p>
+  <ul>
+    <li><strong>Break the mushroom body and the fly can't learn
+    smells.</strong> Mutants and lesions localized smell-memory here long
+    before anyone could watch it happen.<span class="sn-ref"><label
+    class="sn-num" for="sn3"></label><input type="checkbox" id="sn3"
+    class="sn-toggle"><span class="sidenote">Heisenberg 2003 reviews the
+    classical mutant and lesion evidence. Aso et&nbsp;al. 2014a then
+    showed the anatomy reads as an architecture <em>for</em> learning:
+    the sparse KC code feeds 15 compartments, each pairing specific
+    dopamine neurons with specific MBONs.</span></span></li>
+    <li><strong>Flashing the reward cells works as well as sugar.</strong>
+    Shine light on the reward cells while the fly smells something, and
+    it learns to like that smell — no sugar involved.<span
+    class="sn-ref"><label class="sn-num" for="sn4"></label><input
+    type="checkbox" id="sn4" class="sn-toggle"><span class="sidenote">Claridge-Chang
+    et&nbsp;al. 2009 ("Writing memories with light-addressable
+    reinforcement circuitry"); Aso et&nbsp;al. 2014b mapped which
+    dopamine neurons write reward vs. punishment. This optogenetic
+    substitution is why our simulation can deliver reward directly at
+    the dopamine neurons (§5).</span></span></li>
+    <li><strong>The knobs really do turn down.</strong> Recording a
+    decision cell before and after training shows the connections from
+    the trained smell's memory cells get <em>weaker</em>. Weaker, not
+    stronger: the fly learns by turning a dial down.<span
+    class="sn-ref"><label class="sn-num" for="sn5"></label><input
+    type="checkbox" id="sn5" class="sn-toggle"><span class="sidenote">Hige
+    et&nbsp;al. 2015 measured this by patch-clamp: pairing an odor with
+    dopamine-neuron activity depresses that odor's KC→MBON synapses in the
+    matching compartment. Depression of the "wrong" output is the
+    established sign of the change.</span></span></li>
+    <li><strong>Dopamine is the trigger.</strong> The reward cells release
+    dopamine onto exactly these connections, and the chemistry of the
+    dopamine receptors is what detects "smell and reward at the same
+    time."<span class="sn-ref"><label class="sn-num" for="sn6"></label><input
+    type="checkbox" id="sn6" class="sn-toggle"><span class="sidenote">Cohn,
+    Morantte &amp; Ruta 2015 showed dopamine release is compartmentalized
+    and state-dependent; Handler et&nbsp;al. 2019 showed the sign and
+    timing of the plasticity follow from two dopamine receptors with
+    different kinetics. Modi, Shuai &amp; Turner 2020 review the whole
+    story; Bennett et&nbsp;al. 2021 is one of several computational
+    models built on this rule.</span></span></li>
+  </ul>
+  <p>So when we say the model uses "the fly's real learning rule," this is
+  what we mean: same place, same trigger, same direction of change.</p>
+
+  <h2>3 · The map</h2>
+  <p>In 2024, a large team finished tracing an entire fruit-fly brain from
+  electron-microscope images: every one of its roughly 140,000 neurons and
+  50 million connections.<span class="sn-ref"><label class="sn-num"
+  for="sn7"></label><input type="checkbox" id="sn7" class="sn-toggle"><span
+  class="sidenote">FlyWire (Dorkenwald et&nbsp;al. 2024): 139,255
+  neurons and ~50M synapses from one adult female, proofread by a
+  community. For every pair of neurons it gives the synapse count. Schlegel
+  et&nbsp;al. 2024 add a cell class and type for every neuron — that is
+  how we know which cells are sensor, memory, decision, or reward cells.
+  The groups in the diagram are selected by those published labels, not
+  by us.</span></span> A second team turned that map into a simulation:
+  every neuron becomes a simple "fill up, then fire" unit, and each
+  connection is as strong as its number of synapses.<span
+  class="sn-ref"><label class="sn-num" for="sn8"></label><input
+  type="checkbox" id="sn8" class="sn-toggle"><span class="sidenote">Shiu
+  et&nbsp;al. 2024: leaky integrate-and-fire neurons with published
+  constants we did not change — rest/reset −52&nbsp;mV, threshold
+  −45&nbsp;mV, membrane time constant 20&nbsp;ms, synaptic decay
+  5&nbsp;ms, refractory 2.2&nbsp;ms, delay 1.8&nbsp;ms; each synapse
+  contributes 0.275&nbsp;mV, with sign from the predicted
+  neurotransmitter. The model reproduces known responses (sugar →
+  proboscis extension) with no fitting.</span></span> That simulation is
+  what runs in our demo.</p>
+  <p>Here is the catch. A map shows where the roads go, not how traffic
+  changes them. The wiring diagram contains no rule for how connections
+  strengthen or weaken — that machinery is invisible to the microscope.
+  So <em>any</em> simulation built from a map has to have its learning
+  rule added by hand. The honest question is not "did you add a rule?"
+  but "is it the right rule, in the right place?"<span
+  class="sn-ref"><label class="sn-num" for="sn9"></label><input
+  type="checkbox" id="sn9" class="sn-toggle"><span class="sidenote">Also
+  absent from the map: receptor identities, neuromodulator release, gap
+  junctions, and short-term synaptic dynamics. For the learning demo we
+  cut the map to the olfactory pathway plus mushroom body — 8,991 neurons,
+  792k synapses. Doing so surfaced a finding: the published whole-brain
+  model is bistable, and almost any central input tips it into a permanent
+  ~8,400-neuron storm. Four structural edits (each biologically argued,
+  none a parameter fit) remove the storm while leaving odor coding intact;
+  they are listed in the appendix and audited in
+  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/notes.md">notes.md</a>.</span></span></p>
+
+  <h2>4 · The rule</h2>
+  <p>The model's memory is a list of about 62,000 numbers: the strength
+  of every connection from a memory cell to a decision cell. Nothing else
+  in the model remembers anything from one moment to the next.<span
+  class="sn-ref"><label class="sn-num" for="sn10"></label><input
+  type="checkbox" id="sn10" class="sn-toggle"><span class="sidenote">62,261
+  KC→MBON connections (recomputed from the subnet's cell lists and the
+  FlyWire connectivity table). Their weights start at the connectome
+  value. Membrane voltages and synaptic conductances are reset between
+  episodes; only this weight vector carries over.</span></span></p>
+  <p>The rule that changes those numbers fits in one sentence:</p>
+  <div class="keyidea">Whenever the reward cells fire, every connection
+  coming <em>out of</em> a memory cell that was active at the same time
+  gets cut in half.</div>
+  <p>That is the whole algorithm.<span class="sn-ref"><label
+  class="sn-num" for="sn11"></label><input type="checkbox" id="sn11"
+  class="sn-toggle"><span class="sidenote">Verbatim from
+  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/learning_driver_mb.py"><code>learning_driver_mb.py</code></a>:
+  <code class="snblock">kc_active = KCs with ≥1 spike this episode
+pam_hz    = mean PAM DAN rate this episode
+if us and pam_hz >= 1.0:              # dopamine gate
+    hot = synapses whose presynaptic
+          KC is in kc_active
+    w[hot] *= (1 - eta)               # eta = 0.5</code>
+  Dopamine-gated long-term depression at KC→MBON, applied once per
+  episode. No objective function, no gradient, no hidden
+  state.</span></span> No training loop, no error signal, no clever
+  optimization — just "cut these in half."</p>
+  <p><strong>Which parts are real, and which are simplified?</strong> The
+  three things that make this the fly's rule rather than a generic one
+  all match what §2 established: the <em>place</em> (memory-to-decision
+  connections), the <em>trigger</em> (reward cells firing at the same time
+  as the smell), and the <em>direction</em> (weaker). Everything about the
+  <em>fine print</em> is our simplification. In a real fly the change is
+  gradual and depends on precise timing; we apply it in one step at the
+  end of each half-second.<span class="sn-ref"><label class="sn-num"
+  for="sn12"></label><input type="checkbox" id="sn12" class="sn-toggle"><span
+  class="sidenote">Real plasticity is continuous and receptor-mediated,
+  with sign and size depending on odor–dopamine timing at sub-second
+  resolution (Handler 2019). Our episodic "same episode = coincident"
+  abstraction cannot reproduce forward-vs-backward pairing
+  effects.</span></span> A real fly's reward cells are organized into
+  compartments that write different lessons to different decision cells;
+  we use one reward signal for all of them.<span class="sn-ref"><label
+  class="sn-num" for="sn13"></label><input type="checkbox" id="sn13"
+  class="sn-toggle"><span class="sidenote">Biology: 15 compartments, each
+  DAN type writing to its own MBON zone, appetitive and aversive traces
+  in parallel (Aso 2014, Cohn 2015). Model: one scalar gate (mean PAM
+  rate ≥ 1&nbsp;Hz) and one uniform η. Also: real DANs make fast synapses
+  too; we zeroed those for stability, so dopamine acts only through the
+  scripted rule.</span></span> And real memories fade and can be
+  unlearned; ours only ever get stronger.<span class="sn-ref"><label
+  class="sn-num" for="sn14"></label><input type="checkbox" id="sn14"
+  class="sn-toggle"><span class="sidenote">Depression only, permanent. No
+  recovery, extinction, or forgetting. The full biology-vs-model ledger
+  is in the appendix.</span></span></p>
+
+  <h2>5 · Teaching the fly</h2>
+  <p>You probably know Pavlov's dog: ring a bell before every meal, and
+  soon the dog drools at the bell alone. Flies learn the same way with
+  smells. Give them smell A together with sugar, smell B with nothing,
+  and later they walk toward A.<span class="sn-ref"><label class="sn-num"
+  for="sn15"></label><input type="checkbox" id="sn15" class="sn-toggle"><span
+  class="sidenote">In conditioning jargon, the smell is the conditioned
+  stimulus (CS) and the sugar the unconditioned stimulus (US). The classic
+  fly assay is Tully &amp; Quinn 1985: train a group with odor A + sugar
+  or shock and odor B alone, then let them choose between A and B in a
+  T-maze; the fraction choosing A is the memory score. B is the control —
+  it experiences everything except the smell–reward coincidence.</span></span>
+  Our simulation does the same thing, one half-second episode at a
+  time:</p>
+
+  <figure class="wide">
+    <svg class="schematic" viewBox="0 0 860 250" role="img" aria-label="Four-step loop: present the smell for half a second; note which memory cells fired; check whether the reward cells fired; if so, halve those memory cells' connections to decision cells. A return arrow notes that everything else resets and only the connection strengths persist.">
+      <defs>
+        <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/>
+        </marker>
+      </defs>
+      <rect x="16" y="40" width="190" height="104" rx="3" class="box"/>
+      <text x="111" y="64" text-anchor="middle" class="lbl">1 · present the smell</text>
+      <text x="111" y="86" text-anchor="middle" class="sm">half a second of brain activity</text>
+      <text x="111" y="102" text-anchor="middle" class="sm">switch on smell A's sensor cells</text>
+      <text x="111" y="118" text-anchor="middle" class="sm">on reward trials, also switch</text>
+      <text x="111" y="132" text-anchor="middle" class="sm">on the reward cells</text>
+      <line x1="206" y1="92" x2="232" y2="92" class="wire" marker-end="url(#arr2)"/>
+      <rect x="236" y="40" width="176" height="104" rx="3" class="box"/>
+      <text x="324" y="64" text-anchor="middle" class="lbl">2 · take notes</text>
+      <text x="324" y="86" text-anchor="middle" class="sm">which memory cells</text>
+      <text x="324" y="102" text-anchor="middle" class="sm">fired for this smell?</text>
+      <line x1="412" y1="92" x2="438" y2="92" class="wire" marker-end="url(#arr2)"/>
+      <rect x="442" y="40" width="176" height="104" rx="3" class="box dopa"/>
+      <text x="530" y="64" text-anchor="middle" class="lbl">3 · was there a reward?</text>
+      <text x="530" y="86" text-anchor="middle" class="sm">did the reward cells fire</text>
+      <text x="530" y="102" text-anchor="middle" class="sm">during this episode?</text>
+      <text x="530" y="118" text-anchor="middle" class="sm">no → nothing changes</text>
+      <line x1="618" y1="92" x2="644" y2="92" class="wire" marker-end="url(#arr2)"/>
+      <rect x="648" y="40" width="196" height="104" rx="3" class="box hot"/>
+      <text x="746" y="64" text-anchor="middle" class="lbl">4 · turn the knobs down</text>
+      <text x="746" y="88" text-anchor="middle" class="sm">halve every connection from</text>
+      <text x="746" y="104" text-anchor="middle" class="sm">those memory cells to the</text>
+      <text x="746" y="120" text-anchor="middle" class="sm">decision cells</text>
+      <path d="M 746 144 L 746 196 L 111 196 L 111 148" class="wire" fill="none" marker-end="url(#arr2)"/>
+      <text x="428" y="188" text-anchor="middle" class="sm">next episode: everything resets except the connection strengths — they are the memory</text>
+    </svg>
+    <figcaption><strong>One training episode.</strong> The knob-turning
+    happens between episodes, as a bookkeeping step, rather than inside
+    the simulated brain — the main way our version is simpler than the
+    real thing.</figcaption>
+  </figure>
+
+  <p>A "smell" is a particular set of sensor cells switched on for half a
+  second. The "reward" is the reward cells switched on during that same
+  half-second — the light-flash version of sugar from §2, not sugar
+  itself.<span class="sn-ref"><label class="sn-num" for="sn16"></label><input
+  type="checkbox" id="sn16" class="sn-toggle"><span class="sidenote">CS: a
+  disjoint set of six ORN receptor classes, count-balanced, driven at
+  500&nbsp;Hz for 0.5&nbsp;s. US: the 307 PAM dopamine neurons driven at
+  60&nbsp;Hz. We inject the US at the DANs because the model's own
+  sugar→PAM route is silent in this regime (measured: PAMs at 0&nbsp;Hz
+  under sugar drive) — a documented limitation, but one with a real
+  experimental precedent.</span></span> We present smell A with reward
+  five times, with smell B and no reward in between as the control. Then
+  we test: how strongly do the decision cells respond to each smell
+  now?</p>
+  <p>The result: the response to smell A drops by about 99%, while smell
+  B — whose memory cells were never active during a reward — is
+  untouched.<span class="sn-ref"><label class="sn-num" for="sn17"></label><input
+  type="checkbox" id="sn17" class="sn-toggle"><span class="sidenote">Five
+  pairings at η&nbsp;=&nbsp;0.5 compound to ~97% depression per trained
+  synapse. A's MBON response falls from 3,700–4,300 spikes to 0–57 across
+  three seeds; B stays at 3,400–4,300. The MBON-spike readout uses a ×20
+  efficacy correction on KC→MBON synapses (spiking MBON responses in the
+  stable regime are dominated by a few direct PN→MBON connections); the
+  synaptic-trace readout needs no correction and shows the same picture.
+  Details and sensitivity in the
+  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/report.md">report</a>.</span></span>
+  We can't watch this fly walk to a T-maze arm here — the
+  <a href="index.html">navigation demo</a> does that — so the decision
+  cells' response stands in for the behavior.</p>
+  <p>One more thing, and it is the part we find most satisfying. Smells
+  that partly resemble A also get partly suppressed — the more similar,
+  the more suppressed. Nothing in our rule says that should happen. It
+  happens because similar smells share some of the same memory cells, so
+  they share some of the same turned-down knobs. That is the real wiring
+  doing the work, not us.<span class="sn-ref"><label class="sn-num"
+  for="sn18"></label><input type="checkbox" id="sn18" class="sn-toggle"><span
+  class="sidenote">Probe odors sharing 67/50/33/0% of A's receptor
+  classes inherit graded suppression (~60–75% at 67% overlap, falling to
+  0 at disjoint). The synaptic-trace version of this gradient needs no
+  tuned parameters at all. This is the qualitative signature of
+  generalization gradients in real flies.</span></span></p>
+
+  <div class="note wide"><strong>So: realistic, or a hack?</strong> Both,
+  and it is worth being precise about which is which. The <em>place</em>,
+  the <em>trigger</em>, and the <em>direction</em> of the change are the
+  fly's, established by the experiments in §2. The way similar smells
+  share the memory comes from the real wiring in §3. What is ours is the
+  fine print: one big step instead of a gradual change, one reward signal
+  instead of many, memories that never fade. We chose the simplest rule
+  the evidence supports and kept a full list of the simplifications. The
+  test of "realistic" is whether the result depends on our choices; the
+  one place it partly does — how we read out the decision cells — is
+  flagged in the notes, and the similarity result survives with nothing
+  tuned at all.</div>
+
+  <h2>Appendix · the assumptions ledger</h2>
+  <p>For the technically inclined: every place the model is a cartoon of
+  the biology, and why it matters.</p>
+  <div class="tablewrap wide">
+  <table>
+    <thead><tr><th>Aspect</th><th>Real fly</th><th>This model</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Synaptic weight</td>
+        <td>Conductances, receptor content, short-term dynamics</td>
+        <td>Synapse count × predicted transmitter sign (Shiu 2024)</td>
+        <td>Crude proxy; underlies the readout-gain caveat below</td>
+      </tr>
+      <tr>
+        <td>Substrate stability</td>
+        <td>Stable via neuromodulation, gap junctions, adaptation — none in the wiring diagram</td>
+        <td>Four structural edits: DAN fast outputs → 0; KC→KC → 0; ORN afferents input-only; excitatory AL local-neuron outputs → 0</td>
+        <td>The substrate needed surgery before learning was testable — a finding about connectome models, not flies</td>
+      </tr>
+      <tr>
+        <td>Dopamine's fast action</td>
+        <td>DANs also make fast synapses (co-transmission)</td>
+        <td>Zeroed (edit above); dopamine acts <em>only</em> through the scripted rule</td>
+        <td>Clean separation, but neuromodulation exists only where we wrote it in</td>
+      </tr>
+      <tr>
+        <td>Update dynamics</td>
+        <td>Continuous, receptor-mediated; sign and size depend on odor–dopamine <em>timing</em> at sub-second resolution (Handler 2019)</td>
+        <td>One batch multiply between 0.5&nbsp;s episodes; coincidence = "same episode"</td>
+        <td>Timing-dependence (forward vs. backward pairing) cannot emerge</td>
+      </tr>
+      <tr>
+        <td>Dopamine signal</td>
+        <td>Compartmentalized: 15 compartments, each DAN type writing to its own MBON zone, opposite valences in parallel (Aso 2014, Cohn 2015)</td>
+        <td>One scalar gate — mean PAM rate ≥ 1&nbsp;Hz — and one uniform η for all KC→MBON synapses</td>
+        <td>No appetitive/aversive asymmetry, no parallel memory traces</td>
+      </tr>
+      <tr>
+        <td>Direction of change</td>
+        <td>Bidirectional: depression <em>and</em> recovery; memories decay and extinguish</td>
+        <td>Depression only, permanent</td>
+        <td>Extinction, forgetting, re-learning out of scope</td>
+      </tr>
+      <tr>
+        <td>Reward pathway</td>
+        <td>Sugar sensing recruits PAM DANs through circuitry</td>
+        <td>PAMs driven directly at 60&nbsp;Hz — the connectome's own sugar→PAM route is silent in this LIF regime</td>
+        <td>Mirrors optogenetic conditioning, a real paradigm — but the natural reward path is not demonstrated</td>
+      </tr>
+      <tr>
+        <td>Behavioral readout</td>
+        <td>MBON compartment balance → downstream motor bias</td>
+        <td>MBON spike counts, with a ×20 efficacy correction on KC→MBON synapses; the synaptic-trace readout needs no correction</td>
+        <td>Headline % depends on readout choice; the parameter-free trace shows the same gradient</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>References</h2>
+  <ol class="refs">
+    <li>Tully &amp; Quinn (1985). Classical conditioning and retention in
+    normal and mutant Drosophila melanogaster. <em>J Comp Physiol A</em>.
+    <a href="https://doi.org/10.1007/BF01350033">doi:10.1007/BF01350033</a></li>
+    <li>Heisenberg (2003). Mushroom body memoir: from maps to models.
+    <em>Nat Rev Neurosci</em>. <a href="https://doi.org/10.1038/nrn1074">doi:10.1038/nrn1074</a></li>
+    <li>Claridge-Chang et&nbsp;al. (2009). Writing memories with
+    light-addressable reinforcement circuitry. <em>Cell</em>.
+    <a href="https://doi.org/10.1016/j.cell.2009.08.034">doi:10.1016/j.cell.2009.08.034</a></li>
+    <li>Aso et&nbsp;al. (2014a). The neuronal architecture of the mushroom
+    body provides a logic for associative learning. <em>eLife</em>.
+    <a href="https://doi.org/10.7554/eLife.04577">doi:10.7554/eLife.04577</a></li>
+    <li>Aso et&nbsp;al. (2014b). Mushroom body output neurons encode
+    valence and guide memory-based action selection. <em>eLife</em>.
+    <a href="https://doi.org/10.7554/eLife.04580">doi:10.7554/eLife.04580</a></li>
+    <li>Cohn, Morantte &amp; Ruta (2015). Coordinated and
+    compartmentalized neuromodulation shapes sensory processing.
+    <em>Cell</em>.
+    <a href="https://doi.org/10.1016/j.cell.2015.11.019">doi:10.1016/j.cell.2015.11.019</a></li>
+    <li>Hige et&nbsp;al. (2015). Heterosynaptic plasticity underlies
+    aversive olfactory learning in Drosophila. <em>Neuron</em>.
+    <a href="https://doi.org/10.1016/j.neuron.2015.11.003">doi:10.1016/j.neuron.2015.11.003</a></li>
+    <li>Handler et&nbsp;al. (2019). Distinct dopamine receptor pathways
+    underlie the temporal sensitivity of associative learning.
+    <em>Cell</em>.
+    <a href="https://doi.org/10.1016/j.cell.2019.05.040">doi:10.1016/j.cell.2019.05.040</a></li>
+    <li>Modi, Shuai &amp; Turner (2020). The Drosophila mushroom body:
+    from architecture to algorithm. <em>Annu Rev Neurosci</em>.
+    <a href="https://doi.org/10.1146/annurev-neuro-062119-092917">doi:10.1146/annurev-neuro-062119-092917</a></li>
+    <li>Bennett, Philippides &amp; Nowotny (2021). Learning with
+    reinforcement prediction errors in a model of the Drosophila mushroom
+    body. <em>Nat Commun</em>.
+    <a href="https://doi.org/10.1038/s41467-021-22592-4">doi:10.1038/s41467-021-22592-4</a></li>
+    <li>Dorkenwald et&nbsp;al. (2024). Neuronal wiring diagram of an
+    adult brain. <em>Nature</em>.
+    <a href="https://doi.org/10.1038/s41586-024-07558-y">doi:10.1038/s41586-024-07558-y</a></li>
+    <li>Schlegel et&nbsp;al. (2024). Whole-brain annotation and
+    multi-connectome cell typing of Drosophila. <em>Nature</em>.
+    <a href="https://doi.org/10.1038/s41586-024-07686-5">doi:10.1038/s41586-024-07686-5</a></li>
+    <li>Shiu et&nbsp;al. (2024). A Drosophila computational brain model
+    reveals sensorimotor processing. <em>Nature</em>.
+    <a href="https://doi.org/10.1038/s41586-024-07763-9">doi:10.1038/s41586-024-07763-9</a></li>
+  </ol>
+
+  <p>Back to <a href="index.html">the demo</a> · full method and audit
+  trail in the
+  <a href="https://github.com/dtch1997/fly-api/blob/main/experiments/learning/report.md">learning report</a>.</p>
+
+  <div class="hexrow" role="presentation">
+    <div class="hex"></div><div class="hex a"></div><div class="hex e"></div>
+    <div class="hex a"></div><div class="hex"></div><div class="hex a"></div><div class="hex"></div>
+  </div>
+</main>
+</body>
+</html>
