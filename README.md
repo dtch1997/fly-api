@@ -66,6 +66,10 @@ Details, gotchas, and full method: [docs/demo-report.md](docs/demo-report.md).
 
 ## Provenance
 
+**What existed already vs. what's ours:** see the honest ledger in
+[docs/prior-art.md](docs/prior-art.md).
+
+
 Spun out of [dtch1997/jarvis](https://github.com/dtch1997/jarvis)
 (`experiments/fly-connectome-demo`, PR #191). `demo/svt_*.py` are vendored
 from [flygym](https://github.com/NeLy-EPFL/flygym) 1.2.1 (Apache-2.0) with
